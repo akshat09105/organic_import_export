@@ -155,6 +155,7 @@
     /* ── HERO ── */
     .hero {
       height: 100vh;
+      max-height: 850px;
       position: relative;
       display: flex;
       align-items: center;
@@ -843,7 +844,7 @@
         <a href="#about" class="btn-outline">📖 Learn More</a>
       </div>
     </div>
-    <div class="scroll-indicator">
+    <div class="scroll-indicator" onclick="if(window.smoothScrollToElement){window.smoothScrollToElement('about');}else{document.getElementById('about').scrollIntoView({ behavior: 'smooth' });}" style="cursor: pointer;">
       <span>Scroll</span>
       <span class="scroll-arrow">↓</span>
     </div>

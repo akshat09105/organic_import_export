@@ -31,10 +31,9 @@ st.markdown("""
         padding-right: 0rem !important;
     }
     
-    /* Ensure the iframe occupies full viewport height and width */
+    /* Ensure the iframe occupies full width and respects dynamic height */
     iframe {
         width: 100vw !important;
-        height: 100vh !important;
         border: none !important;
     }
     </style>

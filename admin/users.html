@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Users — OrganicTrade Admin</title>
+  <link rel="stylesheet" href="../css/main.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    body{display:flex;min-height:100vh;background:#0a1a0d;overflow-x:hidden;}
+    .sidebar{width:260px;min-height:100vh;flex-shrink:0;background:linear-gradient(180deg,#071009 0%,#0a1a0d 40%,#0d2010 100%);border-right:1px solid rgba(201,168,76,0.15);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100;transition:transform .3s ease;}
+    .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(201,168,76,0.1);display:flex;align-items:center;gap:12px;}
+    .logo-icon{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#c9a84c,#4aaa5e);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;}
+    .logo-text{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:#f0ebe0;line-height:1.2;}
+    .logo-text span{color:#c9a84c;}
+    .logo-sub{font-size:.65rem;color:#7a9080;text-transform:uppercase;letter-spacing:.1em;}
+    .sidebar-nav{flex:1;padding:16px 0;overflow-y:auto;}
+    .nav-section-label{font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.15em;color:#7a9080;padding:12px 20px 6px;margin-top:8px;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;margin:2px 10px;border-radius:10px;color:#b8c4b0;font-size:.875rem;font-weight:500;text-decoration:none;transition:all .2s ease;cursor:pointer;border:1px solid transparent;}
+    .nav-item:hover{background:rgba(201,168,76,0.08);color:#f0ebe0;border-color:rgba(201,168,76,0.1);}
+    .nav-item.active{background:linear-gradient(135deg,rgba(201,168,76,0.18),rgba(201,168,76,0.06));color:#c9a84c;border-color:rgba(201,168,76,0.25);}
+    .nav-item .nav-icon{font-size:1.1rem;width:22px;text-align:center;flex-shrink:0;}
+    .sidebar-user{padding:16px;border-top:1px solid rgba(201,168,76,0.1);display:flex;align-items:center;gap:12px;}
+    .user-avatar{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#c9a84c,#a07d30);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;color:#0a1a0d;flex-shrink:0;}
+    .user-info{flex:1;min-width:0;}
+    .user-name{font-size:.8rem;font-weight:600;color:#f0ebe0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{font-size:.65rem;color:#7a9080;text-transform:uppercase;letter-spacing:.05em;}
+    .logout-btn{width:30px;height:30px;border-radius:7px;background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.2);color:#e74c3c;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;transition:all .2s;flex-shrink:0;}
+    .logout-btn:hover{background:rgba(231,76,60,0.2);}
+    .main-content{margin-left:260px;flex:1;min-height:100vh;display:flex;flex-direction:column;}
+    .topbar{padding:16px 28px;display:flex;align-items:center;justify-content:space-between;background:rgba(10,26,13,0.8);backdrop-filter:blur(10px);border-bottom:1px solid rgba(201,168,76,0.1);position:sticky;top:0;z-index:50;}
+    .topbar-left h1{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:#f0ebe0;}
+    .topbar-left p{font-size:.75rem;color:#7a9080;margin-top:1px;}
+    .topbar-right{display:flex;align-items:center;gap:12px;}
+    .admin-avatar{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#c9a84c,#a07d30);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;color:#0a1a0d;}
+    .topbar-name{font-size:.8rem;font-weight:600;color:#f0ebe0;}
+    .content-area{padding:24px 28px;flex:1;}
+    .mobile-menu-btn{display:none;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);color:#c9a84c;width:36px;height:36px;border-radius:8px;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;}
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;}
+    @media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sidebar-overlay{display:block;opacity:0;pointer-events:none;transition:opacity .3s}.sidebar-overlay.open{opacity:1;pointer-events:all}.main-content{margin-left:0}.mobile-menu-btn{display:flex}}
+
+    /* Stats */
+    .stats-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;}
+    @media(max-width:900px){.stats-bar{grid-template-columns:repeat(3,1fr);}}
+    .stat-card{background:linear-gradient(135deg,rgba(18,40,22,0.9),rgba(14,32,18,0.9));border:1px solid rgba(201,168,76,0.12);border-radius:12px;padding:14px 16px;text-align:center;transition:all .2s;}
+    .stat-card:hover{border-color:rgba(201,168,76,0.3);transform:translateY(-2px);}
+    .stat-card .s-val{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:#f0ebe0;}
+    .stat-card .s-lbl{font-size:.65rem;color:#7a9080;text-transform:uppercase;letter-spacing:.06em;margin-top:3px;}
+
+    /* Filters */
+    .filter-bar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+    .search-wrap{position:relative;flex:1;min-width:200px;}
+    .search-wrap input{width:100%;padding:10px 14px 10px 36px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.15);border-radius:10px;color:#f0ebe0;font-size:.85rem;outline:none;transition:all .2s;}
+    .search-wrap input:focus{border-color:#c9a84c;background:rgba(201,168,76,0.05);}
+    .search-wrap input::placeholder{color:#7a9080;}
+    .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#7a9080;}
+    .filter-select{padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.15);border-radius:10px;color:#f0ebe0;font-size:.85rem;outline:none;cursor:pointer;}
+    .filter-select option{background:#0f2614;}
+
+    /* Main Layout */
+    .users-layout{display:grid;grid-template-columns:1fr 320px;gap:20px;}
+    @media(max-width:1000px){.users-layout{grid-template-columns:1fr;}}
+
+    /* Table */
+    .section-card{background:linear-gradient(135deg,rgba(18,40,22,0.7),rgba(14,32,18,0.7));border:1px solid rgba(201,168,76,0.12);border-radius:16px;overflow:hidden;}
+    .admin-table{width:100%;border-collapse:collapse;font-size:.8rem;}
+    .admin-table thead{background:rgba(255,255,255,0.02);}
+    .admin-table th{padding:11px 14px;text-align:left;font-weight:600;text-transform:uppercase;letter-spacing:.08em;font-size:.65rem;color:#c9a84c;white-space:nowrap;cursor:pointer;user-select:none;}
+    .admin-table td{padding:11px 14px;color:#b8c4b0;border-top:1px solid rgba(201,168,76,0.06);vertical-align:middle;}
+    .admin-table tr{cursor:pointer;}
+    .admin-table tr:hover td{background:rgba(201,168,76,0.04);}
+    .admin-table tr.selected td{background:rgba(201,168,76,0.08);}
+    .user-cell{display:flex;align-items:center;gap:10px;}
+    .u-avatar{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;flex-shrink:0;}
+    .role-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:999px;font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+    .role-admin{background:rgba(201,168,76,0.15);color:#c9a84c;border:1px solid rgba(201,168,76,0.3);}
+    .role-vendor{background:rgba(52,152,219,0.12);color:#3498db;border:1px solid rgba(52,152,219,0.25);}
+    .role-customer{background:rgba(46,204,113,0.1);color:#2ecc71;border:1px solid rgba(46,204,113,0.2);}
+    .status-pill{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:999px;font-size:.62rem;font-weight:600;text-transform:uppercase;}
+    .pill-active{background:rgba(46,204,113,0.12);color:#2ecc71;border:1px solid rgba(46,204,113,0.2);}
+    .pill-inactive{background:rgba(231,76,60,0.1);color:#e74c3c;border:1px solid rgba(231,76,60,0.2);}
+    .action-btn{padding:4px 9px;border-radius:6px;font-size:.68rem;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid;display:inline-flex;align-items:center;gap:3px;background:transparent;vertical-align:middle;}
+    .btn-toggle{color:#f39c12;border-color:rgba(243,156,18,0.3);background:rgba(243,156,18,0.06);}
+    .btn-toggle:hover{background:rgba(243,156,18,0.15);}
+    .btn-delete{color:#e74c3c;border-color:rgba(231,76,60,0.3);background:rgba(231,76,60,0.06);}
+    .btn-delete:hover{background:rgba(231,76,60,0.15);}
+    .btn-orders{color:#3498db;border-color:rgba(52,152,219,0.3);background:rgba(52,152,219,0.06);}
+    .btn-orders:hover{background:rgba(52,152,219,0.15);}
+
+    /* User Detail Panel */
+    .user-panel{background:linear-gradient(135deg,rgba(18,40,22,0.7),rgba(14,32,18,0.7));border:1px solid rgba(201,168,76,0.12);border-radius:16px;padding:20px;height:fit-content;position:sticky;top:84px;}
+    .panel-empty{text-align:center;padding:40px 20px;color:#7a9080;}
+    .panel-empty-icon{font-size:2.5rem;margin-bottom:10px;opacity:.4;}
+    .panel-avatar{width:60px;height:60px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;margin:0 auto 12px;}
+    .panel-name{font-family:'Playfair Display',serif;font-size:1rem;color:#f0ebe0;text-align:center;font-weight:600;}
+    .panel-email{font-size:.75rem;color:#7a9080;text-align:center;margin-top:3px;}
+    .panel-divider{height:1px;background:rgba(201,168,76,0.1);margin:14px 0;}
+    .panel-stat-row{display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:8px;}
+    .panel-stat-label{color:#7a9080;}
+    .panel-stat-value{color:#f0ebe0;font-weight:500;}
+    .panel-section-title{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#c9a84c;margin:14px 0 8px;}
+    .mini-order{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(255,255,255,0.03);border:1px solid rgba(201,168,76,0.07);border-radius:8px;margin-bottom:6px;font-size:.75rem;}
+    .mini-order-id{font-family:monospace;color:#c9a84c;font-size:.68rem;}
+    .mini-order-total{color:#f0ebe0;font-weight:600;}
+    .mini-status{font-size:.6rem;padding:1px 6px;border-radius:4px;}
+
+    /* Orders Modal */
+    .modal-overlay{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,0.8);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:all .25s;}
+    .modal-overlay.open{opacity:1;visibility:visible;}
+    .modal{background:#0f2614;border:1px solid rgba(201,168,76,0.25);border-radius:20px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;transform:scale(0.9);transition:transform .3s cubic-bezier(0.34,1.56,0.64,1);}
+    .modal-overlay.open .modal{transform:scale(1);}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(201,168,76,0.1);}
+    .modal-title{font-family:'Playfair Display',serif;font-size:1rem;color:#f0ebe0;}
+    .modal-close{width:28px;height:28px;border-radius:7px;background:transparent;border:1px solid rgba(201,168,76,0.15);color:#b8c4b0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;transition:all .2s;}
+    .modal-close:hover{border-color:#e74c3c;color:#e74c3c;}
+    .modal-body{padding:20px;}
+
+    /* Confirm dialog */
+    .confirm-overlay{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:all .2s;}
+    .confirm-overlay.open{opacity:1;visibility:visible;}
+    .confirm-box{background:#0f2614;border:1px solid rgba(231,76,60,0.3);border-radius:16px;padding:28px;max-width:360px;width:90%;text-align:center;}
+    .confirm-icon{font-size:2.5rem;margin-bottom:12px;}
+    .confirm-msg{font-size:.9rem;color:#b8c4b0;margin-bottom:20px;}
+    .confirm-btns{display:flex;gap:10px;justify-content:center;}
+    .btn-cancel-conf{padding:9px 20px;border-radius:9px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#b8c4b0;cursor:pointer;font-size:.82rem;transition:all .2s;}
+    .btn-cancel-conf:hover{background:rgba(255,255,255,0.1);}
+    .btn-confirm-del{padding:9px 20px;border-radius:9px;background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;border:none;cursor:pointer;font-size:.82rem;font-weight:600;transition:all .2s;}
+    .btn-confirm-del:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(231,76,60,0.3);}
+  </style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🌿</div>
+    <div>
+      <div class="logo-text">Organic<span>Trade</span></div>
+      <div class="logo-sub">Admin Portal</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main Menu</div>
+    <a class="nav-item" href="index.html"><span class="nav-icon">📊</span> Dashboard</a>
+    <a class="nav-item" href="orders.html"><span class="nav-icon">📦</span> Orders</a>
+    <a class="nav-item active" href="users.html"><span class="nav-icon">👥</span> Users</a>
+    <a class="nav-item" href="vendors.html"><span class="nav-icon">🏪</span> Vendors</a>
+    <a class="nav-item" href="products.html"><span class="nav-icon">🌿</span> Products</a>
+    <div class="nav-section-label">System</div>
+    <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> Settings</a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="user-avatar" id="sidebar-avatar">A</div>
+    <div class="user-info">
+      <div class="user-name" id="sidebar-name">Admin User</div>
+      <div class="user-role">Administrator</div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">🚪</button>
+  </div>
+</aside>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<div class="main-content">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-left">
+        <h1>👥 Customer Management</h1>
+        <p>Manage users, roles, and account status</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div><div class="topbar-name" id="topbar-name">Admin</div><div style="font-size:.7rem;color:#7a9080;">Administrator</div></div>
+      <div class="admin-avatar" id="topbar-avatar">A</div>
+    </div>
+  </div>
+
+  <div class="content-area">
+    <!-- Stats -->
+    <div class="stats-bar">
+      <div class="stat-card"><div class="s-val" id="stat-total">0</div><div class="s-lbl">👥 Total Users</div></div>
+      <div class="stat-card"><div class="s-val" id="stat-customers" style="color:#2ecc71">0</div><div class="s-lbl">🛒 Customers</div></div>
+      <div class="stat-card"><div class="s-val" id="stat-vendors" style="color:#3498db">0</div><div class="s-lbl">🏪 Vendors</div></div>
+      <div class="stat-card"><div class="s-val" id="stat-active" style="color:#2ecc71">0</div><div class="s-lbl">✅ Active</div></div>
+      <div class="stat-card"><div class="s-val" id="stat-inactive" style="color:#e74c3c">0</div><div class="s-lbl">🚫 Inactive</div></div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-bar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Search by name or email..." oninput="applyFilters()"/>
+      </div>
+      <select class="filter-select" id="role-filter" onchange="applyFilters()">
+        <option value="all">All Roles</option>
+        <option value="customer">Customers Only</option>
+        <option value="vendor">Vendors Only</option>
+        <option value="admin">Admins Only</option>
+      </select>
+      <select class="filter-select" id="status-filter" onchange="applyFilters()">
+        <option value="all">All Status</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+      </select>
+    </div>
+
+    <!-- Layout: Table + Panel -->
+    <div class="users-layout">
+      <div class="section-card">
+        <div style="overflow-x:auto;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Joined</th>
+                <th>Status</th>
+                <th>Orders</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Detail Panel -->
+      <div class="user-panel" id="user-panel">
+        <div class="panel-empty">
+          <div class="panel-empty-icon">👤</div>
+          <div style="font-size:.8rem;color:#7a9080;">Click a user to view details</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Orders Modal -->
+<div class="modal-overlay" id="orders-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="orders-modal-title">Order History</span>
+      <button class="modal-close" onclick="closeOrdersModal()">✕</button>
+    </div>
+    <div class="modal-body" id="orders-modal-body"></div>
+  </div>
+</div>
+
+<!-- Confirm Delete -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-icon">⚠️</div>
+    <div style="font-family:'Playfair Display',serif;font-size:1.1rem;color:#f0ebe0;margin-bottom:8px;">Delete User?</div>
+    <div class="confirm-msg" id="confirm-msg">This action cannot be undone.</div>
+    <div class="confirm-btns">
+      <button class="btn-cancel-conf" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-confirm-del" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="../js/store.js"></script>
+<script>
+  function showToast(msg,type='info'){
+    const c=document.getElementById('toast-container');
+    const icons={success:'✅',error:'❌',warning:'⚠️',info:'🌿'};
+    const t=document.createElement('div');
+    t.className=`toast toast-${type}`;
+    t.innerHTML=`<span class="toast-icon">${icons[type]||'🌿'}</span><span class="toast-msg">${msg}</span>`;
+    c.appendChild(t);
+    setTimeout(()=>{t.classList.add('hide');setTimeout(()=>t.remove(),300);},3000);
+  }
+
+  const adminUser=Store.requireAuth(['admin'],'../auth.html');
+  if(!adminUser) throw new Error();
+  document.getElementById('sidebar-avatar').textContent=adminUser.avatar||adminUser.name.charAt(0);
+  document.getElementById('sidebar-name').textContent=adminUser.name;
+  document.getElementById('topbar-avatar').textContent=adminUser.avatar||adminUser.name.charAt(0);
+  document.getElementById('topbar-name').textContent=adminUser.name;
+
+  function doLogout(){Store.logout();showToast('Logged out','success');setTimeout(()=>window.location.href='../auth.html',800);}
+  function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('open');}
+
+  let selectedUserId=null;
+  let pendingDeleteId=null;
+
+  function getAvatarBg(role){
+    return{admin:'linear-gradient(135deg,#c9a84c,#a07d30)',vendor:'linear-gradient(135deg,#3498db,#1a5276)',customer:'linear-gradient(135deg,#2ecc71,#1a6b35)'}[role]||'linear-gradient(135deg,#7a9080,#4a5a52)';
+  }
+
+  function loadStats(){
+    const users=Store.getUsers();
+    document.getElementById('stat-total').textContent=users.length;
+    document.getElementById('stat-customers').textContent=users.filter(u=>u.role==='customer').length;
+    document.getElementById('stat-vendors').textContent=users.filter(u=>u.role==='vendor').length;
+    document.getElementById('stat-active').textContent=users.filter(u=>u.status==='active').length;
+    document.getElementById('stat-inactive').textContent=users.filter(u=>u.status!=='active').length;
+  }
+
+  function applyFilters(){
+    const q=document.getElementById('search-input').value.toLowerCase().trim();
+    const role=document.getElementById('role-filter').value;
+    const status=document.getElementById('status-filter').value;
+    let users=Store.getUsers();
+    if(role!=='all') users=users.filter(u=>u.role===role);
+    if(status!=='all') users=users.filter(u=>u.status===status);
+    if(q) users=users.filter(u=>u.name.toLowerCase().includes(q)||u.email.toLowerCase().includes(q));
+    renderTable(users);
+  }
+
+  function getUserOrderCount(userId){
+    return Store.getOrders({userId}).length;
+  }
+
+  function renderTable(users){
+    const tbody=document.getElementById('users-tbody');
+    if(users.length===0){
+      tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:30px;color:#7a9080;">No users found</td></tr>`;
+      return;
+    }
+    tbody.innerHTML=users.map(u=>{
+      const roleCls=`role-${u.role}`;
+      const roleEmoji={admin:'👑',vendor:'🏪',customer:'🛒'}[u.role]||'👤';
+      const isActive=u.status==='active';
+      const orderCnt=getUserOrderCount(u.id);
+      return `<tr onclick="selectUser('${u.id}')" class="${selectedUserId===u.id?'selected':''}">
+        <td>
+          <div class="user-cell">
+            <div class="u-avatar" style="background:${getAvatarBg(u.role)};color:${u.role==='admin'?'#0a1a0d':'#fff'};">${(u.avatar||u.name.charAt(0)).toUpperCase()}</div>
+            <div>
+              <div style="font-size:.82rem;color:#f0ebe0;font-weight:500;">${u.name}</div>
+              ${u.company?`<div style="font-size:.66rem;color:#7a9080;">${u.company}</div>`:''}
+            </div>
+          </div>
+        </td>
+        <td style="font-size:.75rem;">${u.email}</td>
+        <td><span class="role-badge ${roleCls}">${roleEmoji} ${u.role}</span></td>
+        <td style="font-size:.75rem;">${Store.formatDate(u.createdAt)}</td>
+        <td><span class="status-pill ${isActive?'pill-active':'pill-inactive'}">${isActive?'✅ Active':'🚫 Inactive'}</span></td>
+        <td><span style="background:rgba(201,168,76,0.08);color:#c9a84c;padding:2px 8px;border-radius:6px;font-size:.72rem;font-weight:600;">${orderCnt}</span></td>
+        <td style="white-space:nowrap;" onclick="event.stopPropagation()">
+          <button class="action-btn btn-orders" onclick="viewOrders('${u.id}')">📋 Orders</button>
+          ${u.id!==adminUser.id?`
+            <button class="action-btn btn-toggle" onclick="toggleStatus('${u.id}')" style="margin:0 3px;">${isActive?'🚫 Deactivate':'✅ Activate'}</button>
+            <button class="action-btn btn-delete" onclick="promptDelete('${u.id}','${u.name}')">🗑</button>
+          `:'<span style="font-size:.65rem;color:#7a9080;margin-left:4px;">You</span>'}
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  function selectUser(userId){
+    selectedUserId=userId;
+    const u=Store.getUserById(userId);
+    if(!u) return;
+    applyFilters(); // re-render to show selected
+    const orders=Store.getOrders({userId});
+    const totalSpent=orders.reduce((s,o)=>s+o.total,0);
+    const panel=document.getElementById('user-panel');
+    panel.innerHTML=`
+      <div class="panel-avatar" style="background:${getAvatarBg(u.role)};color:${u.role==='admin'?'#0a1a0d':'#fff'};">${(u.avatar||u.name.charAt(0)).toUpperCase()}</div>
+      <div class="panel-name">${u.name}</div>
+      <div class="panel-email">${u.email}</div>
+      ${u.company?`<div style="font-size:.7rem;color:#c9a84c;text-align:center;margin-top:4px;">🏪 ${u.company}</div>`:''}
+      <div class="panel-divider"></div>
+      <div class="panel-stat-row"><span class="panel-stat-label">Role</span><span class="panel-stat-value" style="text-transform:capitalize;">${u.role}</span></div>
+      <div class="panel-stat-row"><span class="panel-stat-label">Status</span><span class="panel-stat-value" style="color:${u.status==='active'?'#2ecc71':'#e74c3c'}">${u.status==='active'?'✅ Active':'🚫 Inactive'}</span></div>
+      <div class="panel-stat-row"><span class="panel-stat-label">Member Since</span><span class="panel-stat-value">${Store.formatDate(u.createdAt)}</span></div>
+      <div class="panel-stat-row"><span class="panel-stat-label">Total Orders</span><span class="panel-stat-value">${orders.length}</span></div>
+      <div class="panel-stat-row"><span class="panel-stat-label">Total Spent</span><span class="panel-stat-value" style="color:#c9a84c;">${Store.formatPrice(totalSpent)}</span></div>
+      ${u.address?`<div class="panel-divider"></div><div style="font-size:.72rem;color:#7a9080;">📍 ${u.address.street}, ${u.address.city}, ${u.address.state}</div>`:''}
+      <div class="panel-section-title">Recent Orders</div>
+      ${orders.length===0?`<div style="font-size:.76rem;color:#7a9080;text-align:center;padding:10px;">No orders yet</div>`:
+        orders.slice(0,4).map(o=>`
+          <div class="mini-order">
+            <div>
+              <div class="mini-order-id">#${o.id.replace('ord_','').toUpperCase()}</div>
+              <div style="font-size:.66rem;color:#7a9080;">${Store.formatDate(o.createdAt)}</div>
+            </div>
+            <div style="text-align:right;">
+              <div class="mini-order-total">${Store.formatPrice(o.total)}</div>
+              <span class="status-badge status-${o.status}" style="font-size:.55rem;padding:1px 6px;">${o.status}</span>
+            </div>
+          </div>`).join('')
+      }
+      ${u.id!==adminUser.id?`
+        <div class="panel-divider"></div>
+        <div style="display:flex;gap:8px;margin-top:4px;">
+          <button onclick="toggleStatus('${u.id}')" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(243,156,18,0.3);background:rgba(243,156,18,0.08);color:#f39c12;cursor:pointer;font-size:.75rem;font-weight:600;transition:all .2s;" onmouseover="this.style.background='rgba(243,156,18,0.2)'" onmouseout="this.style.background='rgba(243,156,18,0.08)'">${u.status==='active'?'🚫 Deactivate':'✅ Activate'}</button>
+          <button onclick="promptDelete('${u.id}','${u.name}')" style="padding:8px 12px;border-radius:8px;border:1px solid rgba(231,76,60,0.3);background:rgba(231,76,60,0.06);color:#e74c3c;cursor:pointer;font-size:.8rem;transition:all .2s;" onmouseover="this.style.background='rgba(231,76,60,0.15)'" onmouseout="this.style.background='rgba(231,76,60,0.06)'">🗑</button>
+        </div>`:''}`;
+  }
+
+  function toggleStatus(userId){
+    const u=Store.getUserById(userId);
+    if(!u) return;
+    const newStatus=u.status==='active'?'inactive':'active';
+    Store.updateUser(userId,{status:newStatus});
+    showToast(`${u.name} is now ${newStatus}`,'success');
+    loadStats();
+    applyFilters();
+    if(selectedUserId===userId) selectUser(userId);
+  }
+
+  function promptDelete(userId,name){
+    pendingDeleteId=userId;
+    document.getElementById('confirm-msg').textContent=`Delete "${name}"? This cannot be undone.`;
+    document.getElementById('confirm-overlay').classList.add('open');
+  }
+
+  function closeConfirm(){document.getElementById('confirm-overlay').classList.remove('open');pendingDeleteId=null;}
+
+  function confirmDelete(){
+    if(!pendingDeleteId) return;
+    const u=Store.getUserById(pendingDeleteId);
+    Store.deleteUser(pendingDeleteId);
+    showToast(`${u?.name||'User'} deleted`,'success');
+    if(selectedUserId===pendingDeleteId){selectedUserId=null;document.getElementById('user-panel').innerHTML=`<div class="panel-empty"><div class="panel-empty-icon">👤</div><div style="font-size:.8rem;color:#7a9080;">Click a user to view details</div></div>`;}
+    closeConfirm();
+    loadStats();
+    applyFilters();
+  }
+
+  function viewOrders(userId){
+    const u=Store.getUserById(userId)||{name:'User'};
+    const orders=Store.getOrders({userId});
+    document.getElementById('orders-modal-title').textContent=`📦 Orders — ${u.name}`;
+    const body=document.getElementById('orders-modal-body');
+    if(orders.length===0){body.innerHTML=`<div style="text-align:center;padding:30px;color:#7a9080;">No orders yet</div>`;
+    }else{
+      body.innerHTML=orders.map(o=>`
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(201,168,76,0.08);border-radius:10px;padding:14px;margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-family:monospace;color:#c9a84c;font-size:.8rem;font-weight:600;">#${o.id.replace('ord_','').toUpperCase()}</span>
+            <span class="status-badge status-${o.status}" style="font-size:.62rem;">${o.status}</span>
+          </div>
+          <div style="font-size:.75rem;color:#7a9080;margin-bottom:8px;">${Store.formatDate(o.createdAt)} • ${o.items.length} items</div>
+          ${o.items.map(i=>`<div style="font-size:.75rem;color:#b8c4b0;padding:3px 0;">• ${i.name} ×${i.qty}</div>`).join('')}
+          <div style="text-align:right;margin-top:8px;font-weight:600;color:#c9a84c;">${Store.formatPrice(o.total)}</div>
+        </div>`).join('');
+    }
+    document.getElementById('orders-modal').classList.add('open');
+  }
+
+  function closeOrdersModal(){document.getElementById('orders-modal').classList.remove('open');}
+  document.getElementById('orders-modal').addEventListener('click',function(e){if(e.target===this)closeOrdersModal();});
+
+  loadStats();
+  applyFilters();
+</script>
+</body>
+</html>

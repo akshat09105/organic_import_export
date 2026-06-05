@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Orders — OrganicTrade Admin</title>
+  <link rel="stylesheet" href="../css/main.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    body{display:flex;min-height:100vh;background:#0a1a0d;overflow-x:hidden;}
+    .sidebar{width:260px;min-height:100vh;flex-shrink:0;background:linear-gradient(180deg,#071009 0%,#0a1a0d 40%,#0d2010 100%);border-right:1px solid rgba(201,168,76,0.15);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100;transition:transform .3s ease;}
+    .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(201,168,76,0.1);display:flex;align-items:center;gap:12px;}
+    .logo-icon{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#c9a84c,#4aaa5e);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;}
+    .logo-text{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:#f0ebe0;line-height:1.2;}
+    .logo-text span{color:#c9a84c;}
+    .logo-sub{font-size:.65rem;color:#7a9080;text-transform:uppercase;letter-spacing:.1em;}
+    .sidebar-nav{flex:1;padding:16px 0;overflow-y:auto;}
+    .nav-section-label{font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.15em;color:#7a9080;padding:12px 20px 6px;margin-top:8px;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;margin:2px 10px;border-radius:10px;color:#b8c4b0;font-size:.875rem;font-weight:500;text-decoration:none;transition:all .2s ease;cursor:pointer;border:1px solid transparent;}
+    .nav-item:hover{background:rgba(201,168,76,0.08);color:#f0ebe0;border-color:rgba(201,168,76,0.1);}
+    .nav-item.active{background:linear-gradient(135deg,rgba(201,168,76,0.18),rgba(201,168,76,0.06));color:#c9a84c;border-color:rgba(201,168,76,0.25);box-shadow:0 2px 12px rgba(201,168,76,0.1);}
+    .nav-item .nav-icon{font-size:1.1rem;width:22px;text-align:center;flex-shrink:0;}
+    .nav-badge{margin-left:auto;background:rgba(231,76,60,0.2);color:#e74c3c;font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:999px;border:1px solid rgba(231,76,60,0.3);}
+    .sidebar-user{padding:16px;border-top:1px solid rgba(201,168,76,0.1);display:flex;align-items:center;gap:12px;}
+    .user-avatar{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#c9a84c,#a07d30);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;color:#0a1a0d;flex-shrink:0;}
+    .user-info{flex:1;min-width:0;}
+    .user-name{font-size:.8rem;font-weight:600;color:#f0ebe0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{font-size:.65rem;color:#7a9080;text-transform:uppercase;letter-spacing:.05em;}
+    .logout-btn{width:30px;height:30px;border-radius:7px;background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.2);color:#e74c3c;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;transition:all .2s;flex-shrink:0;}
+    .logout-btn:hover{background:rgba(231,76,60,0.2);border-color:rgba(231,76,60,0.4);}
+    .main-content{margin-left:260px;flex:1;min-height:100vh;display:flex;flex-direction:column;}
+    .topbar{padding:16px 28px;display:flex;align-items:center;justify-content:space-between;background:rgba(10,26,13,0.8);backdrop-filter:blur(10px);border-bottom:1px solid rgba(201,168,76,0.1);position:sticky;top:0;z-index:50;}
+    .topbar-left h1{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:#f0ebe0;}
+    .topbar-left p{font-size:.75rem;color:#7a9080;margin-top:1px;}
+    .topbar-right{display:flex;align-items:center;gap:12px;}
+    .admin-avatar{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#c9a84c,#a07d30);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;color:#0a1a0d;}
+    .topbar-name{font-size:.8rem;font-weight:600;color:#f0ebe0;}
+    .topbar-date{font-size:.7rem;color:#7a9080;}
+    .content-area{padding:24px 28px;flex:1;}
+    .mobile-menu-btn{display:none;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);color:#c9a84c;width:36px;height:36px;border-radius:8px;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;}
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;}
+    @media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sidebar-overlay{display:block;opacity:0;pointer-events:none;transition:opacity .3s}.sidebar-overlay.open{opacity:1;pointer-events:all}.main-content{margin-left:0}.mobile-menu-btn{display:flex}}
+
+    /* Stats Bar */
+    .stats-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;}
+    .stat-card{background:linear-gradient(135deg,rgba(18,40,22,0.9),rgba(14,32,18,0.9));border:1px solid rgba(201,168,76,0.12);border-radius:12px;padding:14px 16px;text-align:center;transition:all .2s;}
+    .stat-card:hover{border-color:rgba(201,168,76,0.3);transform:translateY(-2px);}
+    .stat-card .s-val{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:#f0ebe0;}
+    .stat-card .s-lbl{font-size:.65rem;color:#7a9080;text-transform:uppercase;letter-spacing:.06em;margin-top:3px;}
+
+    /* Filter Bar */
+    .filter-bar{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+    .search-wrap{position:relative;flex:1;min-width:200px;}
+    .search-wrap input{width:100%;padding:10px 14px 10px 36px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.15);border-radius:10px;color:#f0ebe0;font-size:.85rem;outline:none;transition:all .2s;}
+    .search-wrap input:focus{border-color:#c9a84c;background:rgba(201,168,76,0.05);}
+    .search-wrap input::placeholder{color:#7a9080;}
+    .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#7a9080;font-size:.9rem;}
+    .filter-select{padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.15);border-radius:10px;color:#f0ebe0;font-size:.85rem;outline:none;cursor:pointer;transition:all .2s;}
+    .filter-select:focus{border-color:#c9a84c;}
+    .filter-select option{background:#0f2614;color:#f0ebe0;}
+
+    /* Status Tabs */
+    .status-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+    .tab-btn{padding:7px 14px;border-radius:8px;border:1px solid rgba(201,168,76,0.15);background:transparent;color:#b8c4b0;font-size:.75rem;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px;}
+    .tab-btn:hover{border-color:rgba(201,168,76,0.3);color:#f0ebe0;}
+    .tab-btn.active{background:rgba(201,168,76,0.15);border-color:rgba(201,168,76,0.4);color:#c9a84c;font-weight:600;}
+    .tab-count{background:rgba(255,255,255,0.08);padding:1px 6px;border-radius:999px;font-size:.6rem;}
+
+    /* Table */
+    .section-card{background:linear-gradient(135deg,rgba(18,40,22,0.7),rgba(14,32,18,0.7));border:1px solid rgba(201,168,76,0.12);border-radius:16px;overflow:hidden;}
+    .admin-table{width:100%;border-collapse:collapse;font-size:.8rem;}
+    .admin-table thead{background:rgba(255,255,255,0.02);}
+    .admin-table th{padding:11px 14px;text-align:left;font-weight:600;text-transform:uppercase;letter-spacing:.08em;font-size:.65rem;color:#c9a84c;white-space:nowrap;cursor:pointer;user-select:none;}
+    .admin-table th:hover{color:#e8c870;}
+    .admin-table td{padding:12px 14px;color:#b8c4b0;border-top:1px solid rgba(201,168,76,0.06);vertical-align:middle;}
+    .admin-table tr:hover td{background:rgba(201,168,76,0.03);}
+    .order-id{font-family:monospace;color:#c9a84c;font-weight:600;font-size:.75rem;}
+    .status-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+    .status-processing{background:rgba(52,152,219,0.12);color:#3498db;border:1px solid rgba(52,152,219,0.25);}
+    .status-shipped{background:rgba(243,156,18,0.12);color:#f39c12;border:1px solid rgba(243,156,18,0.25);}
+    .status-delivered{background:rgba(46,204,113,0.12);color:#2ecc71;border:1px solid rgba(46,204,113,0.25);}
+    .status-cancelled{background:rgba(231,76,60,0.12);color:#e74c3c;border:1px solid rgba(231,76,60,0.25);}
+    .action-btn{padding:5px 10px;border-radius:7px;font-size:.7rem;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid;display:inline-flex;align-items:center;gap:3px;background:transparent;vertical-align:middle;}
+    .btn-view{background:rgba(201,168,76,0.08);color:#c9a84c;border-color:rgba(201,168,76,0.2);}
+    .btn-view:hover{background:rgba(201,168,76,0.18);border-color:rgba(201,168,76,0.4);}
+    .status-select{padding:4px 8px;border-radius:7px;border:1px solid rgba(201,168,76,0.2);background:rgba(201,168,76,0.06);color:#c9a84c;font-size:.7rem;cursor:pointer;outline:none;}
+    .status-select option{background:#0f2614;color:#f0ebe0;}
+    .customer-cell{display:flex;align-items:center;gap:8px;}
+    .cust-avatar{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#2d6e3a,#1e4022);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#f0ebe0;flex-shrink:0;}
+    .sort-icon{opacity:.4;font-size:.65rem;}
+    .sort-active .sort-icon{opacity:1;color:#c9a84c;}
+    .empty-row td{text-align:center;padding:40px;color:#7a9080;}
+
+    /* Modal */
+    .modal-overlay{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,0.8);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:all .25s;}
+    .modal-overlay.open{opacity:1;visibility:visible;}
+    .modal{background:#0f2614;border:1px solid rgba(201,168,76,0.25);border-radius:20px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;transform:scale(0.9) translateY(20px);transition:transform .3s cubic-bezier(0.34,1.56,0.64,1);}
+    .modal-overlay.open .modal{transform:scale(1) translateY(0);}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid rgba(201,168,76,0.1);}
+    .modal-title{font-family:'Playfair Display',serif;font-size:1.1rem;color:#f0ebe0;}
+    .modal-close{width:30px;height:30px;border-radius:7px;background:transparent;border:1px solid rgba(201,168,76,0.15);color:#b8c4b0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;transition:all .2s;}
+    .modal-close:hover{border-color:#e74c3c;color:#e74c3c;}
+    .modal-body{padding:24px;}
+    .modal-footer{padding:16px 24px;border-top:1px solid rgba(201,168,76,0.1);display:flex;gap:10px;justify-content:flex-end;}
+
+    /* Order Detail */
+    .detail-section{margin-bottom:20px;}
+    .detail-section h4{font-family:'Playfair Display',serif;font-size:.9rem;color:#c9a84c;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(201,168,76,0.1);}
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .detail-item{background:rgba(255,255,255,0.03);border:1px solid rgba(201,168,76,0.08);border-radius:8px;padding:10px 12px;}
+    .detail-item-label{font-size:.65rem;color:#7a9080;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;}
+    .detail-item-value{font-size:.82rem;color:#f0ebe0;font-weight:500;}
+    .order-item-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(201,168,76,0.06);}
+    .order-item-row:last-child{border-bottom:none;}
+    .order-item-img{width:44px;height:44px;border-radius:8px;object-fit:cover;border:1px solid rgba(201,168,76,0.15);flex-shrink:0;}
+    .order-item-info{flex:1;min-width:0;}
+    .order-item-name{font-size:.82rem;color:#f0ebe0;font-weight:500;}
+    .order-item-qty{font-size:.72rem;color:#7a9080;}
+    .order-item-price{font-size:.82rem;color:#c9a84c;font-weight:600;flex-shrink:0;}
+
+    /* Timeline */
+    .timeline{position:relative;padding-left:20px;}
+    .timeline::before{content:'';position:absolute;left:6px;top:0;bottom:0;width:2px;background:rgba(201,168,76,0.15);}
+    .timeline-item{position:relative;margin-bottom:12px;padding-left:16px;}
+    .timeline-item::before{content:'';position:absolute;left:-20px;top:4px;width:10px;height:10px;border-radius:50%;background:#c9a84c;border:2px solid #0f2614;}
+    .timeline-item-status{font-size:.78rem;font-weight:600;color:#f0ebe0;text-transform:capitalize;}
+    .timeline-item-date{font-size:.68rem;color:#7a9080;}
+    .price-summary{background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.1);border-radius:10px;padding:14px;}
+    .price-row{display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:7px;}
+    .price-row:last-child{margin-bottom:0;padding-top:7px;border-top:1px solid rgba(201,168,76,0.1);font-weight:700;font-size:.88rem;}
+    .price-row span:last-child{color:#c9a84c;}
+    .update-status-wrap{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+    .status-update-select{flex:1;padding:9px 12px;border-radius:9px;border:1px solid rgba(201,168,76,0.2);background:rgba(201,168,76,0.06);color:#c9a84c;font-size:.82rem;outline:none;cursor:pointer;}
+    .status-update-select option{background:#0f2614;color:#f0ebe0;}
+    .btn-update{padding:9px 18px;border-radius:9px;background:linear-gradient(135deg,#c9a84c,#a07d30);color:#0a1a0d;font-size:.8rem;font-weight:700;border:none;cursor:pointer;transition:all .2s;}
+    .btn-update:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(201,168,76,0.3);}
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🌿</div>
+    <div>
+      <div class="logo-text">Organic<span>Trade</span></div>
+      <div class="logo-sub">Admin Portal</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main Menu</div>
+    <a class="nav-item" href="index.html"><span class="nav-icon">📊</span> Dashboard</a>
+    <a class="nav-item active" href="orders.html"><span class="nav-icon">📦</span> Orders</a>
+    <a class="nav-item" href="users.html"><span class="nav-icon">👥</span> Users</a>
+    <a class="nav-item" href="vendors.html"><span class="nav-icon">🏪</span> Vendors</a>
+    <a class="nav-item" href="products.html"><span class="nav-icon">🌿</span> Products</a>
+    <div class="nav-section-label">System</div>
+    <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> Settings</a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="user-avatar" id="sidebar-avatar">A</div>
+    <div class="user-info">
+      <div class="user-name" id="sidebar-name">Admin User</div>
+      <div class="user-role">Administrator</div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()" title="Logout">🚪</button>
+  </div>
+</aside>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<!-- Main -->
+<div class="main-content">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-left">
+        <h1>📦 Order Management</h1>
+        <p>Manage and track all customer orders</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div>
+        <div class="topbar-name" id="topbar-name">Admin User</div>
+        <div class="topbar-date">Administrator</div>
+      </div>
+      <div class="admin-avatar" id="topbar-avatar">A</div>
+    </div>
+  </div>
+
+  <div class="content-area">
+    <!-- Stats Bar -->
+    <div class="stats-bar" id="stats-bar">
+      <div class="stat-card"><div class="s-val" id="stat-all">0</div><div class="s-lbl">📦 All Orders</div></div>
+      <div class="stat-card"><div class="s-val" id="stat-processing" style="color:#3498db">0</div><div class="s-lbl">⏳ Processing</div></div>
+      <div class="stat-card"><div class="s-val" id="stat-shipped" style="color:#f39c12">0</div><div class="s-lbl">🚚 Shipped</div></div>
+      <div class="stat-card"><div class="s-val" id="stat-delivered" style="color:#2ecc71">0</div><div class="s-lbl">✅ Delivered</div></div>
+      <div class="stat-card"><div class="s-val" id="stat-cancelled" style="color:#e74c3c">0</div><div class="s-lbl">❌ Cancelled</div></div>
+    </div>
+
+    <!-- Status Tabs + Search -->
+    <div class="status-tabs" id="status-tabs">
+      <button class="tab-btn active" data-status="all" onclick="setTab(this,'all')">📦 All <span class="tab-count" id="tc-all">0</span></button>
+      <button class="tab-btn" data-status="processing" onclick="setTab(this,'processing')">⏳ Processing <span class="tab-count" id="tc-processing">0</span></button>
+      <button class="tab-btn" data-status="shipped" onclick="setTab(this,'shipped')">🚚 Shipped <span class="tab-count" id="tc-shipped">0</span></button>
+      <button class="tab-btn" data-status="delivered" onclick="setTab(this,'delivered')">✅ Delivered <span class="tab-count" id="tc-delivered">0</span></button>
+      <button class="tab-btn" data-status="cancelled" onclick="setTab(this,'cancelled')">❌ Cancelled <span class="tab-count" id="tc-cancelled">0</span></button>
+    </div>
+
+    <div class="filter-bar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Search orders by ID, customer..." oninput="applyFilters()"/>
+      </div>
+      <select class="filter-select" id="sort-select" onchange="applyFilters()">
+        <option value="date-desc">Newest First</option>
+        <option value="date-asc">Oldest First</option>
+        <option value="total-desc">Highest Total</option>
+        <option value="total-asc">Lowest Total</option>
+      </select>
+    </div>
+
+    <!-- Table -->
+    <div class="section-card">
+      <div style="overflow-x:auto;">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th onclick="sortBy('id')">Order ID <span class="sort-icon">↕</span></th>
+              <th>Customer</th>
+              <th onclick="sortBy('date')">Date <span class="sort-icon">↕</span></th>
+              <th>Items</th>
+              <th onclick="sortBy('total')">Total <span class="sort-icon">↕</span></th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="orders-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Order Detail Modal -->
+<div class="modal-overlay" id="order-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-order-id">Order Details</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body">Loading...</div>
+    <div class="modal-footer">
+      <div class="update-status-wrap">
+        <select class="status-update-select" id="modal-status-select">
+          <option value="processing">⏳ Processing</option>
+          <option value="shipped">🚚 Shipped</option>
+          <option value="delivered">✅ Delivered</option>
+          <option value="cancelled">❌ Cancelled</option>
+        </select>
+        <button class="btn-update" onclick="updateModalOrderStatus()">Update Status</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="../js/store.js"></script>
+<script>
+  function showToast(msg,type='info'){
+    const c=document.getElementById('toast-container');
+    const icons={success:'✅',error:'❌',warning:'⚠️',info:'🌿'};
+    const t=document.createElement('div');
+    t.className=`toast toast-${type}`;
+    t.innerHTML=`<span class="toast-icon">${icons[type]||'🌿'}</span><span class="toast-msg">${msg}</span>`;
+    c.appendChild(t);
+    setTimeout(()=>{t.classList.add('hide');setTimeout(()=>t.remove(),300);},3000);
+  }
+
+  const user=Store.requireAuth(['admin'],'../auth.html');
+  if(!user) throw new Error();
+  document.getElementById('sidebar-avatar').textContent=user.avatar||user.name.charAt(0);
+  document.getElementById('sidebar-name').textContent=user.name;
+  document.getElementById('topbar-avatar').textContent=user.avatar||user.name.charAt(0);
+  document.getElementById('topbar-name').textContent=user.name;
+
+  function doLogout(){Store.logout();showToast('Logged out','success');setTimeout(()=>window.location.href='../auth.html',800);}
+  function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('open');}
+
+  let currentTab='all';
+  let sortField='date';
+  let sortDir='desc';
+  let currentOrderId=null;
+
+  function getStatusEmoji(s){return{processing:'⏳',shipped:'🚚',delivered:'✅',cancelled:'❌'}[s]||'📦';}
+
+  function loadStats(){
+    const orders=Store.getOrders();
+    const statuses=['all','processing','shipped','delivered','cancelled'];
+    statuses.forEach(s=>{
+      const count=s==='all'?orders.length:orders.filter(o=>o.status===s).length;
+      const el=document.getElementById('stat-'+s);
+      if(el) el.textContent=count;
+      const tc=document.getElementById('tc-'+s);
+      if(tc) tc.textContent=count;
+    });
+  }
+
+  function setTab(btn,status){
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentTab=status;
+    applyFilters();
+  }
+
+  function sortBy(field){
+    if(sortField===field) sortDir=sortDir==='desc'?'asc':'desc';
+    else{sortField=field;sortDir='desc';}
+    applyFilters();
+  }
+
+  function applyFilters(){
+    const q=document.getElementById('search-input').value.toLowerCase().trim();
+    const sortVal=document.getElementById('sort-select').value;
+    let orders=Store.getOrders();
+
+    if(currentTab!=='all') orders=orders.filter(o=>o.status===currentTab);
+    if(q) orders=orders.filter(o=>{
+      const u=Store.getUserById(o.userId)||{name:''};
+      return o.id.toLowerCase().includes(q)||u.name.toLowerCase().includes(q);
+    });
+
+    // Sort
+    if(sortVal==='date-desc') orders.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+    else if(sortVal==='date-asc') orders.sort((a,b)=>new Date(a.createdAt)-new Date(b.createdAt));
+    else if(sortVal==='total-desc') orders.sort((a,b)=>b.total-a.total);
+    else if(sortVal==='total-asc') orders.sort((a,b)=>a.total-b.total);
+
+    renderTable(orders);
+  }
+
+  function renderTable(orders){
+    const tbody=document.getElementById('orders-tbody');
+    if(orders.length===0){
+      tbody.innerHTML=`<tr class="empty-row"><td colspan="7">🔍 No orders found</td></tr>`;
+      return;
+    }
+    tbody.innerHTML=orders.map(o=>{
+      const u=Store.getUserById(o.userId)||{name:'Unknown Customer',avatar:'?'};
+      const sc=`status-${o.status}`;
+      return `<tr>
+        <td><span class="order-id">#${o.id.replace('ord_','').toUpperCase()}</span></td>
+        <td><div class="customer-cell"><div class="cust-avatar">${(u.avatar||u.name.charAt(0)).toUpperCase()}</div><div><div style="font-size:.82rem;color:#f0ebe0;font-weight:500;">${u.name}</div><div style="font-size:.68rem;color:#7a9080;">${u.email||''}</div></div></div></td>
+        <td>${Store.formatDate(o.createdAt)}</td>
+        <td><span style="background:rgba(201,168,76,0.08);color:#c9a84c;padding:2px 8px;border-radius:6px;font-size:.72rem;font-weight:600;">${o.items.length} item${o.items.length!==1?'s':''}</span></td>
+        <td style="color:#c9a84c;font-weight:600;">${Store.formatPrice(o.total)}</td>
+        <td><span class="status-badge ${sc}">${getStatusEmoji(o.status)} ${o.status}</span></td>
+        <td style="display:flex;gap:6px;align-items:center;">
+          <button class="action-btn btn-view" onclick="openModal('${o.id}')">👁 View</button>
+          <select class="status-select" onchange="quickUpdateStatus('${o.id}',this.value)">
+            <option value="processing" ${o.status==='processing'?'selected':''}>⏳ Processing</option>
+            <option value="shipped" ${o.status==='shipped'?'selected':''}>🚚 Shipped</option>
+            <option value="delivered" ${o.status==='delivered'?'selected':''}>✅ Delivered</option>
+            <option value="cancelled" ${o.status==='cancelled'?'selected':''}>❌ Cancelled</option>
+          </select>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  function quickUpdateStatus(orderId, status){
+    Store.updateOrder(orderId, status);
+    showToast(`Order updated to ${status}`,'success');
+    loadStats();
+    applyFilters();
+    if(currentOrderId===orderId) openModal(orderId);
+  }
+
+  function openModal(orderId){
+    currentOrderId=orderId;
+    const order=Store.getOrderById(orderId);
+    if(!order){showToast('Order not found','error');return;}
+    const u=Store.getUserById(order.userId)||{name:'Unknown',email:'',address:{}};
+    document.getElementById('modal-order-id').textContent=`Order #${order.id.replace('ord_','').toUpperCase()}`;
+    document.getElementById('modal-status-select').value=order.status;
+
+    const addr=order.shippingAddress||{};
+    const itemsHtml=order.items.map(item=>`
+      <div class="order-item-row">
+        <img src="${item.image}" alt="${item.name}" class="order-item-img" onerror="this.style.display='none'"/>
+        <div class="order-item-info">
+          <div class="order-item-name">${item.name}</div>
+          <div class="order-item-qty">Qty: ${item.qty} × ${Store.formatPrice(item.price)}</div>
+        </div>
+        <div class="order-item-price">${Store.formatPrice(item.price*item.qty)}</div>
+      </div>`).join('');
+
+    const timelineHtml=(order.timeline||[]).map(t=>`
+      <div class="timeline-item">
+        <div class="timeline-item-status">${getStatusEmoji(t.status)} ${t.status}</div>
+        <div class="timeline-item-date">${Store.formatDate(t.date)}</div>
+      </div>`).join('');
+
+    document.getElementById('modal-body').innerHTML=`
+      <div class="detail-section">
+        <h4>👤 Customer Information</h4>
+        <div class="detail-grid">
+          <div class="detail-item"><div class="detail-item-label">Name</div><div class="detail-item-value">${u.name}</div></div>
+          <div class="detail-item"><div class="detail-item-label">Email</div><div class="detail-item-value">${u.email||'N/A'}</div></div>
+          <div class="detail-item"><div class="detail-item-label">Payment</div><div class="detail-item-value">💳 ${order.paymentMethod||'N/A'}</div></div>
+          <div class="detail-item"><div class="detail-item-label">Order Date</div><div class="detail-item-value">${Store.formatDate(order.createdAt)}</div></div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <h4>📍 Shipping Address</h4>
+        <div class="detail-item" style="grid-column:span 2;">
+          <div class="detail-item-value">${addr.street||'N/A'}, ${addr.city||''}, ${addr.state||''} ${addr.zip||''}, ${addr.country||''}</div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <h4>🛒 Order Items (${order.items.length})</h4>
+        ${itemsHtml}
+      </div>
+      <div class="detail-section">
+        <h4>💰 Payment Summary</h4>
+        <div class="price-summary">
+          <div class="price-row"><span>Subtotal</span><span>${Store.formatPrice(order.subtotal)}</span></div>
+          <div class="price-row"><span>Shipping</span><span>${Store.formatPrice(order.shipping)}</span></div>
+          <div class="price-row"><span>Tax</span><span>${Store.formatPrice(order.tax)}</span></div>
+          <div class="price-row"><span>Total</span><span>${Store.formatPrice(order.total)}</span></div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <h4>⏱ Order Timeline</h4>
+        <div class="timeline">${timelineHtml||'<div style="color:#7a9080;font-size:.8rem;">No timeline data</div>'}</div>
+      </div>`;
+
+    document.getElementById('order-modal').classList.add('open');
+  }
+
+  function closeModal(){
+    document.getElementById('order-modal').classList.remove('open');
+    currentOrderId=null;
+  }
+
+  function updateModalOrderStatus(){
+    if(!currentOrderId) return;
+    const status=document.getElementById('modal-status-select').value;
+    Store.updateOrder(currentOrderId,status);
+    showToast(`Order status updated to ${status} ✓`,'success');
+    loadStats();
+    applyFilters();
+    closeModal();
+  }
+
+  // Close modal on overlay click
+  document.getElementById('order-modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+  loadStats();
+  applyFilters();
+</script>
+</body>
+</html>

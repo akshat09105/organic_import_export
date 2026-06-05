@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vendors — OrganicTrade Admin</title>
+  <link rel="stylesheet" href="../css/main.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    body{display:flex;min-height:100vh;background:#0a1a0d;overflow-x:hidden;}
+    .sidebar{width:260px;min-height:100vh;flex-shrink:0;background:linear-gradient(180deg,#071009 0%,#0a1a0d 40%,#0d2010 100%);border-right:1px solid rgba(201,168,76,0.15);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100;transition:transform .3s ease;}
+    .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(201,168,76,0.1);display:flex;align-items:center;gap:12px;}
+    .logo-icon{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#c9a84c,#4aaa5e);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;}
+    .logo-text{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:#f0ebe0;line-height:1.2;}
+    .logo-text span{color:#c9a84c;}
+    .logo-sub{font-size:.65rem;color:#7a9080;text-transform:uppercase;letter-spacing:.1em;}
+    .sidebar-nav{flex:1;padding:16px 0;overflow-y:auto;}
+    .nav-section-label{font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.15em;color:#7a9080;padding:12px 20px 6px;margin-top:8px;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;margin:2px 10px;border-radius:10px;color:#b8c4b0;font-size:.875rem;font-weight:500;text-decoration:none;transition:all .2s ease;cursor:pointer;border:1px solid transparent;}
+    .nav-item:hover{background:rgba(201,168,76,0.08);color:#f0ebe0;border-color:rgba(201,168,76,0.1);}
+    .nav-item.active{background:linear-gradient(135deg,rgba(201,168,76,0.18),rgba(201,168,76,0.06));color:#c9a84c;border-color:rgba(201,168,76,0.25);}
+    .nav-item .nav-icon{font-size:1.1rem;width:22px;text-align:center;flex-shrink:0;}
+    .sidebar-user{padding:16px;border-top:1px solid rgba(201,168,76,0.1);display:flex;align-items:center;gap:12px;}
+    .user-avatar{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#c9a84c,#a07d30);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;color:#0a1a0d;flex-shrink:0;}
+    .user-info{flex:1;min-width:0;}
+    .user-name{font-size:.8rem;font-weight:600;color:#f0ebe0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{font-size:.65rem;color:#7a9080;text-transform:uppercase;letter-spacing:.05em;}
+    .logout-btn{width:30px;height:30px;border-radius:7px;background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.2);color:#e74c3c;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;transition:all .2s;flex-shrink:0;}
+    .logout-btn:hover{background:rgba(231,76,60,0.2);}
+    .main-content{margin-left:260px;flex:1;min-height:100vh;display:flex;flex-direction:column;}
+    .topbar{padding:16px 28px;display:flex;align-items:center;justify-content:space-between;background:rgba(10,26,13,0.8);backdrop-filter:blur(10px);border-bottom:1px solid rgba(201,168,76,0.1);position:sticky;top:0;z-index:50;}
+    .topbar-left h1{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:#f0ebe0;}
+    .topbar-left p{font-size:.75rem;color:#7a9080;margin-top:1px;}
+    .topbar-right{display:flex;align-items:center;gap:12px;}
+    .admin-avatar{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#c9a84c,#a07d30);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;color:#0a1a0d;}
+    .topbar-name{font-size:.8rem;font-weight:600;color:#f0ebe0;}
+    .content-area{padding:24px 28px;flex:1;}
+    .mobile-menu-btn{display:none;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);color:#c9a84c;width:36px;height:36px;border-radius:8px;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;}
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;}
+    @media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sidebar-overlay{display:block;opacity:0;pointer-events:none;transition:opacity .3s}.sidebar-overlay.open{opacity:1;pointer-events:all}.main-content{margin-left:0}.mobile-menu-btn{display:flex}}
+
+    /* Stats */
+    .stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+    @media(max-width:800px){.stats-bar{grid-template-columns:repeat(2,1fr);}}
+    .stat-card{background:linear-gradient(135deg,rgba(18,40,22,0.9),rgba(14,32,18,0.9));border:1px solid rgba(201,168,76,0.12);border-radius:12px;padding:16px;text-align:center;transition:all .2s;}
+    .stat-card:hover{border-color:rgba(201,168,76,0.3);transform:translateY(-2px);}
+    .s-val{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:#f0ebe0;}
+    .s-lbl{font-size:.65rem;color:#7a9080;text-transform:uppercase;letter-spacing:.06em;margin-top:3px;}
+
+    /* Filter + Search */
+    .filter-bar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center;}
+    .search-wrap{position:relative;flex:1;min-width:200px;}
+    .search-wrap input{width:100%;padding:10px 14px 10px 36px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.15);border-radius:10px;color:#f0ebe0;font-size:.85rem;outline:none;transition:all .2s;}
+    .search-wrap input:focus{border-color:#c9a84c;background:rgba(201,168,76,0.05);}
+    .search-wrap input::placeholder{color:#7a9080;}
+    .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#7a9080;}
+    .status-tabs{display:flex;gap:8px;flex-wrap:wrap;}
+    .tab-btn{padding:8px 16px;border-radius:9px;border:1px solid rgba(201,168,76,0.15);background:transparent;color:#b8c4b0;font-size:.78rem;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px;}
+    .tab-btn:hover{border-color:rgba(201,168,76,0.3);color:#f0ebe0;}
+    .tab-btn.active{background:rgba(201,168,76,0.15);border-color:rgba(201,168,76,0.4);color:#c9a84c;font-weight:600;}
+
+    /* Vendor Cards Grid */
+    .vendors-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;}
+
+    .vendor-card{
+      background:linear-gradient(135deg,rgba(18,40,22,0.85),rgba(14,32,18,0.85));
+      border:1px solid rgba(201,168,76,0.12);border-radius:16px;padding:20px;
+      transition:all .25s ease;position:relative;overflow:hidden;
+    }
+    .vendor-card::before{content:'';position:absolute;top:0;right:0;width:80px;height:80px;background:radial-gradient(circle,rgba(201,168,76,0.06),transparent);border-radius:50%;transform:translate(20px,-20px);}
+    .vendor-card:hover{border-color:rgba(201,168,76,0.3);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,0.3),0 0 20px rgba(201,168,76,0.06);}
+    .vendor-card.pending-card{border-color:rgba(243,156,18,0.2);}
+    .vendor-card.pending-card::before{background:radial-gradient(circle,rgba(243,156,18,0.06),transparent);}
+
+    .vendor-card-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;}
+    .vendor-avatar{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#3498db,#1a5276);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;color:#fff;flex-shrink:0;}
+    .vendor-avatar.approved-av{background:linear-gradient(135deg,#2ecc71,#1a6b35);}
+    .vendor-avatar.pending-av{background:linear-gradient(135deg,#f39c12,#8a5a00);}
+    .vendor-header-info{flex:1;min-width:0;}
+    .vendor-name{font-family:'Playfair Display',serif;font-size:.95rem;font-weight:600;color:#f0ebe0;margin-bottom:2px;}
+    .vendor-email{font-size:.72rem;color:#7a9080;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .approval-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-top:5px;}
+    .badge-approved{background:rgba(46,204,113,0.12);color:#2ecc71;border:1px solid rgba(46,204,113,0.25);}
+    .badge-pending{background:rgba(243,156,18,0.12);color:#f39c12;border:1px solid rgba(243,156,18,0.25);}
+
+    .vendor-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+    .v-stat{background:rgba(255,255,255,0.03);border:1px solid rgba(201,168,76,0.07);border-radius:8px;padding:8px 10px;text-align:center;}
+    .v-stat-val{font-size:.9rem;font-weight:700;color:#f0ebe0;}
+    .v-stat-lbl{font-size:.6rem;color:#7a9080;text-transform:uppercase;letter-spacing:.04em;margin-top:2px;}
+
+    .vendor-card-footer{display:flex;gap:8px;flex-wrap:wrap;}
+    .vc-btn{flex:1;padding:8px 10px;border-radius:9px;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid;display:flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;}
+    .vc-btn:hover{transform:translateY(-1px);}
+    .btn-approve{background:rgba(46,204,113,0.1);color:#2ecc71;border-color:rgba(46,204,113,0.25);}
+    .btn-approve:hover{background:rgba(46,204,113,0.2);box-shadow:0 3px 10px rgba(46,204,113,0.15);}
+    .btn-reject{background:rgba(231,76,60,0.08);color:#e74c3c;border-color:rgba(231,76,60,0.2);}
+    .btn-reject:hover{background:rgba(231,76,60,0.16);}
+    .btn-products{background:rgba(52,152,219,0.08);color:#3498db;border-color:rgba(52,152,219,0.2);}
+    .btn-products:hover{background:rgba(52,152,219,0.16);}
+    .btn-remove{background:rgba(231,76,60,0.06);color:#e74c3c;border-color:rgba(231,76,60,0.15);flex:0;padding:8px 10px;}
+    .btn-remove:hover{background:rgba(231,76,60,0.14);}
+
+    .empty-state{text-align:center;padding:60px 20px;color:#7a9080;grid-column:1/-1;}
+    .empty-state-icon{font-size:3rem;margin-bottom:12px;opacity:.4;}
+
+    /* Products Modal */
+    .modal-overlay{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,0.8);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:all .25s;}
+    .modal-overlay.open{opacity:1;visibility:visible;}
+    .modal{background:#0f2614;border:1px solid rgba(201,168,76,0.25);border-radius:20px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;transform:scale(0.9);transition:transform .3s cubic-bezier(0.34,1.56,0.64,1);}
+    .modal-overlay.open .modal{transform:scale(1);}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(201,168,76,0.1);}
+    .modal-title{font-family:'Playfair Display',serif;font-size:1rem;color:#f0ebe0;}
+    .modal-close{width:28px;height:28px;border-radius:7px;background:transparent;border:1px solid rgba(201,168,76,0.15);color:#b8c4b0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;transition:all .2s;}
+    .modal-close:hover{border-color:#e74c3c;color:#e74c3c;}
+    .modal-body{padding:20px;}
+    .product-mini{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(201,168,76,0.06);}
+    .product-mini:last-child{border-bottom:none;}
+    .product-mini img{width:40px;height:40px;border-radius:8px;object-fit:cover;border:1px solid rgba(201,168,76,0.15);}
+    .product-mini-info{flex:1;min-width:0;}
+    .product-mini-name{font-size:.82rem;color:#f0ebe0;font-weight:500;}
+    .product-mini-cat{font-size:.68rem;color:#7a9080;}
+    .product-mini-price{font-size:.82rem;color:#c9a84c;font-weight:600;}
+    .active-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#2ecc71;margin-right:4px;}
+    .inactive-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#e74c3c;margin-right:4px;}
+
+    /* Confirm */
+    .confirm-overlay{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:all .2s;}
+    .confirm-overlay.open{opacity:1;visibility:visible;}
+    .confirm-box{background:#0f2614;border:1px solid rgba(231,76,60,0.3);border-radius:16px;padding:28px;max-width:360px;width:90%;text-align:center;}
+    .confirm-icon{font-size:2.5rem;margin-bottom:12px;}
+    .confirm-msg{font-size:.87rem;color:#b8c4b0;margin-bottom:20px;}
+    .confirm-btns{display:flex;gap:10px;justify-content:center;}
+    .btn-cancel-conf{padding:9px 20px;border-radius:9px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#b8c4b0;cursor:pointer;font-size:.82rem;transition:all .2s;}
+    .btn-cancel-conf:hover{background:rgba(255,255,255,0.1);}
+    .btn-confirm-del{padding:9px 20px;border-radius:9px;background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;border:none;cursor:pointer;font-size:.82rem;font-weight:600;}
+    .btn-confirm-del:hover{transform:translateY(-1px);}
+  </style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🌿</div>
+    <div>
+      <div class="logo-text">Organic<span>Trade</span></div>
+      <div class="logo-sub">Admin Portal</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main Menu</div>
+    <a class="nav-item" href="index.html"><span class="nav-icon">📊</span> Dashboard</a>
+    <a class="nav-item" href="orders.html"><span class="nav-icon">📦</span> Orders</a>
+    <a class="nav-item" href="users.html"><span class="nav-icon">👥</span> Users</a>
+    <a class="nav-item active" href="vendors.html"><span class="nav-icon">🏪</span> Vendors</a>
+    <a class="nav-item" href="products.html"><span class="nav-icon">🌿</span> Products</a>
+    <div class="nav-section-label">System</div>
+    <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> Settings</a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="user-avatar" id="sidebar-avatar">A</div>
+    <div class="user-info">
+      <div class="user-name" id="sidebar-name">Admin User</div>
+      <div class="user-role">Administrator</div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">🚪</button>
+  </div>
+</aside>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<div class="main-content">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-left">
+        <h1>🏪 Vendor Management</h1>
+        <p>Approve, manage, and monitor vendors</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div><div class="topbar-name" id="topbar-name">Admin</div><div style="font-size:.7rem;color:#7a9080;">Administrator</div></div>
+      <div class="admin-avatar" id="topbar-avatar">A</div>
+    </div>
+  </div>
+
+  <div class="content-area">
+    <!-- Stats -->
+    <div class="stats-bar">
+      <div class="stat-card"><div class="s-val" id="stat-total">0</div><div class="s-lbl">🏪 Total Vendors</div></div>
+      <div class="stat-card"><div class="s-val" id="stat-approved" style="color:#2ecc71">0</div><div class="s-lbl">✅ Approved</div></div>
+      <div class="stat-card"><div class="s-val" id="stat-pending" style="color:#f39c12">0</div><div class="s-lbl">⏳ Pending</div></div>
+      <div class="stat-card"><div class="s-val" id="stat-products" style="color:#c9a84c">0</div><div class="s-lbl">🌿 Total Products</div></div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-bar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Search vendors by name or email..." oninput="applyFilters()"/>
+      </div>
+      <div class="status-tabs">
+        <button class="tab-btn active" data-filter="all" onclick="setFilter(this,'all')">📋 All</button>
+        <button class="tab-btn" data-filter="approved" onclick="setFilter(this,'approved')">✅ Approved</button>
+        <button class="tab-btn" data-filter="pending" onclick="setFilter(this,'pending')">⏳ Pending</button>
+      </div>
+    </div>
+
+    <!-- Vendor Cards -->
+    <div class="vendors-grid" id="vendors-grid">
+      <div style="text-align:center;padding:40px;color:#7a9080;grid-column:1/-1;">Loading vendors...</div>
+    </div>
+  </div>
+</div>
+
+<!-- Products Modal -->
+<div class="modal-overlay" id="products-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="products-modal-title">Vendor Products</span>
+      <button class="modal-close" onclick="closeProductsModal()">✕</button>
+    </div>
+    <div class="modal-body" id="products-modal-body"></div>
+  </div>
+</div>
+
+<!-- Confirm -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-icon">⚠️</div>
+    <div style="font-family:'Playfair Display',serif;font-size:1.1rem;color:#f0ebe0;margin-bottom:8px;" id="confirm-title">Confirm Action</div>
+    <div class="confirm-msg" id="confirm-msg">This action cannot be undone.</div>
+    <div class="confirm-btns">
+      <button class="btn-cancel-conf" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-confirm-del" id="confirm-action-btn" onclick="runConfirmAction()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="../js/store.js"></script>
+<script>
+  function showToast(msg,type='info'){
+    const c=document.getElementById('toast-container');
+    const icons={success:'✅',error:'❌',warning:'⚠️',info:'🌿'};
+    const t=document.createElement('div');
+    t.className=`toast toast-${type}`;
+    t.innerHTML=`<span class="toast-icon">${icons[type]||'🌿'}</span><span class="toast-msg">${msg}</span>`;
+    c.appendChild(t);
+    setTimeout(()=>{t.classList.add('hide');setTimeout(()=>t.remove(),300);},3000);
+  }
+
+  const adminUser=Store.requireAuth(['admin'],'../auth.html');
+  if(!adminUser) throw new Error();
+  document.getElementById('sidebar-avatar').textContent=adminUser.avatar||adminUser.name.charAt(0);
+  document.getElementById('sidebar-name').textContent=adminUser.name;
+  document.getElementById('topbar-avatar').textContent=adminUser.avatar||adminUser.name.charAt(0);
+  document.getElementById('topbar-name').textContent=adminUser.name;
+
+  function doLogout(){Store.logout();showToast('Logged out','success');setTimeout(()=>window.location.href='../auth.html',800);}
+  function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('open');}
+
+  let currentFilter='all';
+  let confirmCallback=null;
+
+  function loadStats(){
+    const vendors=Store.getUsers().filter(u=>u.role==='vendor');
+    const approved=vendors.filter(v=>v.approved===true);
+    const pending=vendors.filter(v=>!v.approved);
+    const products=Store.getProducts();
+    document.getElementById('stat-total').textContent=vendors.length;
+    document.getElementById('stat-approved').textContent=approved.length;
+    document.getElementById('stat-pending').textContent=pending.length;
+    document.getElementById('stat-products').textContent=products.length;
+  }
+
+  function setFilter(btn,filter){
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter=filter;
+    applyFilters();
+  }
+
+  function applyFilters(){
+    const q=document.getElementById('search-input').value.toLowerCase().trim();
+    let vendors=Store.getUsers().filter(u=>u.role==='vendor');
+    if(currentFilter==='approved') vendors=vendors.filter(v=>v.approved===true);
+    if(currentFilter==='pending') vendors=vendors.filter(v=>!v.approved);
+    if(q) vendors=vendors.filter(v=>v.name.toLowerCase().includes(q)||(v.email||'').toLowerCase().includes(q)||(v.company||'').toLowerCase().includes(q));
+    renderGrid(vendors);
+  }
+
+  function renderGrid(vendors){
+    const grid=document.getElementById('vendors-grid');
+    if(vendors.length===0){
+      grid.innerHTML=`<div class="empty-state"><div class="empty-state-icon">🏪</div><div style="font-size:.9rem;color:#b8c4b0;">No vendors found</div></div>`;
+      return;
+    }
+    grid.innerHTML=vendors.map(v=>{
+      const products=Store.getProducts({vendorId:v.id});
+      const activeProds=products.filter(p=>p.active).length;
+      const isApproved=v.approved===true;
+      const initial=(v.company||v.name||'V').charAt(0).toUpperCase();
+      return `<div class="vendor-card ${isApproved?'':'pending-card'}">
+        <div class="vendor-card-header">
+          <div class="vendor-avatar ${isApproved?'approved-av':'pending-av'}">${initial}</div>
+          <div class="vendor-header-info">
+            <div class="vendor-name">${v.company||v.name}</div>
+            <div class="vendor-email">✉️ ${v.email}</div>
+            <div>
+              ${isApproved
+                ?`<span class="approval-badge badge-approved">✅ Approved</span>`
+                :`<span class="approval-badge badge-pending">⏳ Pending Approval</span>`
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="vendor-stats">
+          <div class="v-stat">
+            <div class="v-stat-val">${products.length}</div>
+            <div class="v-stat-lbl">🌿 Products</div>
+          </div>
+          <div class="v-stat">
+            <div class="v-stat-val" style="color:#2ecc71">${activeProds}</div>
+            <div class="v-stat-lbl">✅ Active</div>
+          </div>
+          <div class="v-stat">
+            <div class="v-stat-val" style="color:#c9a84c">${Store.formatDate(v.createdAt)}</div>
+            <div class="v-stat-lbl">📅 Joined</div>
+          </div>
+          <div class="v-stat">
+            <div class="v-stat-val" style="color:${v.status==='active'?'#2ecc71':'#e74c3c'}">${v.status==='active'?'Active':'Inactive'}</div>
+            <div class="v-stat-lbl">📌 Status</div>
+          </div>
+        </div>
+
+        <div class="vendor-card-footer">
+          ${isApproved
+            ?`<button class="vc-btn btn-products" onclick="viewProducts('${v.id}','${v.company||v.name}')">🌿 View Products</button>
+               <button class="vc-btn btn-reject" onclick="confirmReject('${v.id}','${v.company||v.name}')">🚫 Revoke</button>
+               <button class="vc-btn btn-remove" onclick="confirmRemove('${v.id}','${v.company||v.name}')">🗑</button>`
+            :`<button class="vc-btn btn-approve" onclick="approveVendor('${v.id}')">✅ Approve</button>
+               <button class="vc-btn btn-reject" onclick="confirmRemove('${v.id}','${v.company||v.name}')">❌ Reject</button>`
+          }
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function approveVendor(vendorId){
+    const v=Store.getUserById(vendorId);
+    Store.updateUser(vendorId,{approved:true,status:'active'});
+    showToast(`${v?.company||v?.name||'Vendor'} approved! ✅`,'success');
+    loadStats();
+    applyFilters();
+  }
+
+  function confirmReject(vendorId,name){
+    confirmCallback=()=>{Store.updateUser(vendorId,{approved:false,status:'inactive'});showToast(`${name} access revoked`,'warning');loadStats();applyFilters();};
+    document.getElementById('confirm-title').textContent='Revoke Access?';
+    document.getElementById('confirm-msg').textContent=`Revoke approval for "${name}"? They will lose vendor access.`;
+    document.getElementById('confirm-action-btn').textContent='Revoke';
+    document.getElementById('confirm-overlay').classList.add('open');
+  }
+
+  function confirmRemove(vendorId,name){
+    confirmCallback=()=>{Store.deleteUser(vendorId);showToast(`${name} removed`,'success');loadStats();applyFilters();};
+    document.getElementById('confirm-title').textContent='Remove Vendor?';
+    document.getElementById('confirm-msg').textContent=`Permanently remove "${name}"? This cannot be undone.`;
+    document.getElementById('confirm-action-btn').textContent='Remove';
+    document.getElementById('confirm-overlay').classList.add('open');
+  }
+
+  function closeConfirm(){document.getElementById('confirm-overlay').classList.remove('open');confirmCallback=null;}
+
+  function runConfirmAction(){
+    if(confirmCallback) confirmCallback();
+    closeConfirm();
+  }
+
+  function viewProducts(vendorId,vendorName){
+    const products=Store.getProducts({vendorId});
+    document.getElementById('products-modal-title').textContent=`🌿 Products — ${vendorName}`;
+    const body=document.getElementById('products-modal-body');
+    if(products.length===0){
+      body.innerHTML=`<div style="text-align:center;padding:30px;color:#7a9080;">No products from this vendor yet</div>`;
+    } else {
+      body.innerHTML=products.map(p=>`
+        <div class="product-mini">
+          <img src="${p.image}" alt="${p.name}" onerror="this.style.display='none'"/>
+          <div class="product-mini-info">
+            <div class="product-mini-name"><span class="${p.active?'active-dot':'inactive-dot'}"></span>${p.name}</div>
+            <div class="product-mini-cat">🏷 ${p.category} • 📦 Stock: ${p.stock}</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="product-mini-price">${Store.formatPrice(p.salePrice||p.price)}</div>
+            ${p.featured?`<div style="font-size:.6rem;color:#c9a84c;margin-top:2px;">⭐ Featured</div>`:''}
+          </div>
+        </div>`).join('');
+    }
+    document.getElementById('products-modal').classList.add('open');
+  }
+
+  function closeProductsModal(){document.getElementById('products-modal').classList.remove('open');}
+  document.getElementById('products-modal').addEventListener('click',function(e){if(e.target===this)closeProductsModal();});
+
+  loadStats();
+  applyFilters();
+</script>
+</body>
+</html>

@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Product — OrganicTrade</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/main.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a1a0d;
+      --bg2: #0f2212;
+      --bg3: #162b1a;
+      --gold: #c9a84c;
+      --gold2: #e8c96a;
+      --text: #f0ebe0;
+      --text2: #b8b0a0;
+      --green: #2d6a4f;
+      --green2: #40916c;
+      --sidebar-w: 260px;
+      --radius: 14px;
+      --input-bg: rgba(255,255,255,0.04);
+      --input-border: rgba(255,255,255,0.1);
+      --input-focus: rgba(201,168,76,0.35);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ── SIDEBAR (same as dashboard) ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: linear-gradient(180deg, #061009 0%, #0a1a0d 40%, #061009 100%);
+      border-right: 1px solid rgba(201,168,76,0.15);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      z-index: 100;
+    }
+
+    .sidebar-logo {
+      padding: 28px 24px 20px;
+      border-bottom: 1px solid rgba(201,168,76,0.12);
+    }
+
+    .sidebar-logo .logo-mark {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    .sidebar-logo .logo-sub {
+      font-size: 0.7rem;
+      color: var(--text2);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .sidebar-badge {
+      display: inline-block;
+      background: rgba(201,168,76,0.15);
+      color: var(--gold);
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      border: 1px solid rgba(201,168,76,0.25);
+      margin-top: 6px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 12px;
+      overflow-y: auto;
+    }
+
+    .nav-label {
+      font-size: 0.65rem;
+      color: var(--text2);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 8px 12px 4px;
+      margin-top: 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--text2);
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      margin-bottom: 2px;
+    }
+
+    .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, rgba(201,168,76,0.18), rgba(201,168,76,0.06));
+      color: var(--gold);
+      border: 1px solid rgba(201,168,76,0.2);
+    }
+
+    .nav-item .icon { font-size: 1.1rem; width: 22px; text-align: center; flex-shrink: 0; }
+
+    .sidebar-profile {
+      padding: 16px;
+      border-top: 1px solid rgba(201,168,76,0.12);
+    }
+
+    .profile-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(201,168,76,0.12);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .profile-avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), #a07830);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--bg);
+      flex-shrink: 0;
+    }
+
+    .profile-info .name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+    .profile-info .role { font-size: 0.7rem; color: var(--gold); }
+
+    .btn-logout {
+      width: 100%;
+      padding: 9px;
+      background: rgba(201,168,76,0.08);
+      border: 1px solid rgba(201,168,76,0.2);
+      border-radius: 8px;
+      color: var(--text2);
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+
+    .btn-logout:hover { background: rgba(220,60,60,0.15); border-color: rgba(220,60,60,0.3); color: #f87171; }
+
+    /* ── MAIN ── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      background: rgba(10,26,13,0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(201,168,76,0.1);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .topbar-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+
+    .breadcrumb {
+      font-size: 0.8rem;
+      color: var(--text2);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .breadcrumb a { color: var(--gold); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--gold2); }
+
+    .page-content {
+      padding: 32px;
+      flex: 1;
+    }
+
+    /* ── FORM LAYOUT ── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* ── FORM SECTIONS ── */
+    .form-section {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: var(--radius);
+      margin-bottom: 20px;
+      overflow: hidden;
+      transition: border-color 0.3s;
+    }
+
+    .form-section:focus-within {
+      border-color: rgba(201,168,76,0.2);
+    }
+
+    .form-section-header {
+      padding: 18px 24px;
+      background: rgba(255,255,255,0.02);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .form-section-icon { font-size: 1.2rem; }
+
+    .form-section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .form-section-desc {
+      font-size: 0.75rem;
+      color: var(--text2);
+      margin-left: auto;
+    }
+
+    .form-section-body {
+      padding: 24px;
+    }
+
+    /* ── FORM ELEMENTS ── */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group:last-child { margin-bottom: 0; }
+
+    label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text2);
+      margin-bottom: 7px;
+      letter-spacing: 0.3px;
+    }
+
+    label .required {
+      color: #f87171;
+      margin-left: 3px;
+    }
+
+    label .optional {
+      color: var(--text2);
+      font-weight: 400;
+      font-size: 0.75rem;
+      margin-left: 4px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="url"],
+    select,
+    textarea {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 10px;
+      padding: 11px 14px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.875rem;
+      outline: none;
+      transition: all 0.25s ease;
+      resize: vertical;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    input[type="url"]:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--gold);
+      background: rgba(201,168,76,0.05);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+    }
+
+    input.error, select.error, textarea.error {
+      border-color: #f87171 !important;
+      box-shadow: 0 0 0 3px rgba(248,113,113,0.12);
+    }
+
+    .error-msg {
+      font-size: 0.74rem;
+      color: #f87171;
+      margin-top: 5px;
+      display: none;
+    }
+
+    .error-msg.show { display: block; }
+
+    select option { background: #0f2212; color: var(--text); }
+
+    textarea { min-height: 90px; }
+    textarea.large { min-height: 150px; }
+
+    .input-hint {
+      font-size: 0.73rem;
+      color: var(--text2);
+      margin-top: 5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* ── CERTIFICATIONS CHECKBOXES ── */
+    .cert-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .cert-item {
+      position: relative;
+    }
+
+    .cert-item input[type="checkbox"] {
+      position: absolute;
+      opacity: 0;
+      width: 0; height: 0;
+    }
+
+    .cert-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.78rem;
+      color: var(--text2);
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .cert-label .check-box {
+      width: 16px; height: 16px;
+      border: 1.5px solid rgba(255,255,255,0.2);
+      border-radius: 4px;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+      font-size: 0.6rem;
+    }
+
+    .cert-item input:checked + .cert-label {
+      background: rgba(201,168,76,0.1);
+      border-color: rgba(201,168,76,0.35);
+      color: var(--gold);
+    }
+
+    .cert-item input:checked + .cert-label .check-box {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #000;
+    }
+
+    .cert-item input:checked + .cert-label .check-box::after {
+      content: '✓';
+    }
+
+    /* ── IMAGE PREVIEW ── */
+    .image-preview-box {
+      border: 2px dashed rgba(201,168,76,0.2);
+      border-radius: 12px;
+      overflow: hidden;
+      aspect-ratio: 16/9;
+      background: rgba(255,255,255,0.02);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+      transition: border-color 0.3s;
+      position: relative;
+    }
+
+    .image-preview-box.has-image { border-style: solid; border-color: rgba(201,168,76,0.3); }
+
+    .image-preview-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .img-placeholder {
+      text-align: center;
+      color: var(--text2);
+    }
+
+    .img-placeholder .ph-icon { font-size: 2.5rem; margin-bottom: 8px; opacity: 0.4; }
+    .img-placeholder p { font-size: 0.78rem; }
+
+    /* ── TAGS ── */
+    .tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+      min-height: 32px;
+    }
+
+    .tag-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(201,168,76,0.12);
+      border: 1px solid rgba(201,168,76,0.25);
+      border-radius: 20px;
+      padding: 4px 10px 4px 12px;
+      font-size: 0.78rem;
+      color: var(--gold);
+      animation: tagIn 0.2s ease;
+    }
+
+    .tag-pill .remove {
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+      font-size: 0.85rem;
+      line-height: 1;
+    }
+
+    .tag-pill .remove:hover { opacity: 1; }
+
+    @keyframes tagIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    /* ── SIDEBAR PANEL (right column) ── */
+    .sidebar-panel {
+      position: sticky;
+      top: 88px;
+    }
+
+    .panel {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .panel-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .panel-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .panel-body { padding: 20px; }
+
+    /* ── SUBMIT BUTTON ── */
+    .btn-submit {
+      width: 100%;
+      padding: 14px 20px;
+      background: linear-gradient(135deg, var(--gold) 0%, #a07830 100%);
+      border: none;
+      border-radius: 12px;
+      color: #0a1a0d;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 0.3px;
+    }
+
+    .btn-submit::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.15);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(201,168,76,0.35);
+    }
+
+    .btn-submit:hover::before { opacity: 1; }
+
+    .btn-submit:active { transform: translateY(0); }
+
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-cancel {
+      width: 100%;
+      padding: 11px 20px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      color: var(--text2);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 10px;
+      text-align: center;
+      text-decoration: none;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+
+    .btn-cancel:hover {
+      border-color: rgba(255,255,255,0.25);
+      color: var(--text);
+      background: rgba(255,255,255,0.04);
+    }
+
+    /* ── STOCK BAR ── */
+    .stock-bar-wrap { margin-top: 6px; }
+    .stock-bar {
+      height: 4px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+    }
+    .stock-fill { height: 100%; border-radius: 4px; transition: width 0.4s; }
+
+    /* ── EDIT MODE BANNER ── */
+    .edit-banner {
+      background: rgba(201,168,76,0.1);
+      border: 1px solid rgba(201,168,76,0.25);
+      border-radius: 10px;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .edit-banner span { font-size: 0.875rem; color: var(--gold); }
+
+    /* ── TOAST ── */
+    #toast-container {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      z-index: 9999;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+
+    .toast {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 18px;
+      border-radius: 10px;
+      background: var(--bg3);
+      border: 1px solid rgba(201,168,76,0.25);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      animation: slideIn 0.3s ease;
+      min-width: 260px; max-width: 360px;
+    }
+
+    .toast.hide { animation: slideOut 0.3s ease forwards; }
+    .toast-success { border-color: rgba(52,211,153,0.3); }
+    .toast-error   { border-color: rgba(248,113,113,0.3); }
+    .toast-warning { border-color: rgba(245,158,11,0.3); }
+    .toast-icon { font-size: 1.1rem; flex-shrink: 0; }
+    .toast-msg  { font-size: 0.85rem; color: var(--text); }
+
+    @keyframes slideIn { from { opacity:0; transform: translateX(20px); } to { opacity:1; transform: translateX(0); } }
+    @keyframes slideOut { from { opacity:1; transform: translateX(0); } to { opacity:0; transform: translateX(20px); } }
+
+    @media (max-width: 1100px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .sidebar-panel { position: static; }
+      .cert-grid { grid-template-columns: repeat(2,1fr); }
+    }
+
+    @media (max-width: 768px) {
+      .form-row { grid-template-columns: 1fr; }
+      .cert-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">🌿 OrganicTrade</div>
+    <div class="logo-sub">Import &amp; Export</div>
+    <span class="sidebar-badge">Product Manager</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-label">Main Menu</div>
+    <a href="index.html" class="nav-item">
+      <span class="icon">📊</span> Dashboard
+    </a>
+    <a href="my-products.html" class="nav-item" id="myProductsNav">
+      <span class="icon">🌿</span> My Products
+    </a>
+    <a href="add-product.html" class="nav-item active" id="addProductNav">
+      <span class="icon">➕</span> Add Product
+    </a>
+    <a href="orders.html" class="nav-item">
+      <span class="icon">📦</span> My Orders
+    </a>
+    <div class="nav-label" style="margin-top:16px;">Account</div>
+    <a href="profile.html" class="nav-item">
+      <span class="icon">👤</span> Profile
+    </a>
+  </nav>
+
+  <div class="sidebar-profile">
+    <div class="profile-card">
+      <div class="profile-avatar" id="sidebarAvatar">P</div>
+      <div class="profile-info">
+        <div class="name" id="sidebarName">Loading…</div>
+        <div class="role">Product Manager</div>
+      </div>
+    </div>
+    <button class="btn-logout" id="logoutBtn"><span>🚪</span> Sign Out</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="pageTitle">➕ Add New Product</div>
+      <div class="breadcrumb">
+        <a href="index.html">Dashboard</a> › <span id="breadcrumbLabel">Add Product</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-content">
+
+    <!-- EDIT MODE BANNER -->
+    <div class="edit-banner" id="editBanner" style="display:none;">
+      <span style="font-size:1.2rem">✏️</span>
+      <span>You are editing an existing product. Changes will update the live listing.</span>
+    </div>
+
+    <form id="productForm" novalidate>
+      <div class="form-grid">
+
+        <!-- LEFT COLUMN -->
+        <div>
+
+          <!-- SECTION 1: BASIC INFO -->
+          <div class="form-section">
+            <div class="form-section-header">
+              <span class="form-section-icon">📝</span>
+              <span class="form-section-title">Basic Information</span>
+              <span class="form-section-desc">Name, category &amp; descriptions</span>
+            </div>
+            <div class="form-section-body">
+
+              <div class="form-group">
+                <label for="productName">Product Name <span class="required">*</span></label>
+                <input type="text" id="productName" placeholder="e.g. Organic Turmeric Powder" maxlength="100" />
+                <div class="error-msg" id="err-name">Please enter a product name.</div>
+              </div>
+
+              <div class="form-group">
+                <label for="productCategory">Category <span class="required">*</span></label>
+                <select id="productCategory">
+                  <option value="">— Select Category —</option>
+                  <option value="Spices">🌶️ Spices</option>
+                  <option value="Grains">🌾 Grains</option>
+                  <option value="Herbs">🌿 Herbs</option>
+                  <option value="Oils">🫙 Oils</option>
+                  <option value="Dried Fruits">🍇 Dried Fruits</option>
+                  <option value="Teas">🍵 Teas</option>
+                </select>
+                <div class="error-msg" id="err-category">Please select a category.</div>
+              </div>
+
+              <div class="form-group">
+                <label for="productDescription">Short Description <span class="required">*</span></label>
+                <textarea id="productDescription" placeholder="A concise 1–3 sentence description shown on product cards and search results…" maxlength="300"></textarea>
+                <div class="error-msg" id="err-description">Please enter a short description.</div>
+                <div class="input-hint">💡 This appears on product cards. Keep it engaging and informative.</div>
+              </div>
+
+              <div class="form-group" style="margin-bottom:0">
+                <label for="productLongDesc">Full Description <span class="optional">(optional)</span></label>
+                <textarea id="productLongDesc" class="large" placeholder="Detailed description: origin story, nutritional info, culinary uses, sourcing methods, certifications explanation…"></textarea>
+                <div class="input-hint">📖 Shown on the full product page. More detail = more trust.</div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- SECTION 2: PRICING -->
+          <div class="form-section">
+            <div class="form-section-header">
+              <span class="form-section-icon">💰</span>
+              <span class="form-section-title">Pricing &amp; Availability</span>
+              <span class="form-section-desc">Price, units &amp; stock</span>
+            </div>
+            <div class="form-section-body">
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="productPrice">Price (USD) <span class="required">*</span></label>
+                  <input type="number" id="productPrice" min="0.01" step="0.01" placeholder="0.00" />
+                  <div class="error-msg" id="err-price">Please enter a valid price.</div>
+                </div>
+                <div class="form-group">
+                  <label for="productSalePrice">Sale Price <span class="optional">(optional)</span></label>
+                  <input type="number" id="productSalePrice" min="0.01" step="0.01" placeholder="Leave blank if no sale" />
+                  <div class="input-hint">💸 Must be less than regular price.</div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="productUnit">Unit <span class="required">*</span></label>
+                  <select id="productUnit">
+                    <option value="">— Select Unit —</option>
+                    <option value="per kg">per kg</option>
+                    <option value="per liter">per liter</option>
+                    <option value="per 250g">per 250g</option>
+                    <option value="per 100g">per 100g</option>
+                    <option value="per piece">per piece</option>
+                  </select>
+                  <div class="error-msg" id="err-unit">Please select a unit.</div>
+                </div>
+                <div class="form-group">
+                  <label for="productMoq">Min. Order Qty <span class="required">*</span></label>
+                  <input type="number" id="productMoq" min="0.1" step="0.1" placeholder="1" />
+                  <div class="error-msg" id="err-moq">Please enter minimum order quantity.</div>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom:0">
+                <label for="productStock">Stock Quantity <span class="required">*</span></label>
+                <input type="number" id="productStock" min="0" step="1" placeholder="0" />
+                <div class="error-msg" id="err-stock">Please enter stock quantity.</div>
+                <div class="stock-bar-wrap" id="stockBarWrap" style="display:none;">
+                  <div class="stock-bar" style="margin-top:8px;">
+                    <div class="stock-fill" id="stockFill"></div>
+                  </div>
+                  <div class="input-hint" id="stockHint"></div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- SECTION 3: ORIGIN & CERTIFICATIONS -->
+          <div class="form-section">
+            <div class="form-section-header">
+              <span class="form-section-icon">🌍</span>
+              <span class="form-section-title">Origin &amp; Certifications</span>
+              <span class="form-section-desc">Source country &amp; quality marks</span>
+            </div>
+            <div class="form-section-body">
+
+              <div class="form-group">
+                <label for="productOrigin">Origin Country <span class="required">*</span></label>
+                <select id="productOrigin">
+                  <option value="">— Select Country —</option>
+                  <option value="India">🇮🇳 India</option>
+                  <option value="Sri Lanka">🇱🇰 Sri Lanka</option>
+                  <option value="Guatemala">🇬🇹 Guatemala</option>
+                  <option value="Vietnam">🇻🇳 Vietnam</option>
+                  <option value="Peru">🇵🇪 Peru</option>
+                  <option value="Thailand">🇹🇭 Thailand</option>
+                  <option value="Turkey">🇹🇷 Turkey</option>
+                  <option value="Jordan">🇯🇴 Jordan</option>
+                  <option value="Ethiopia">🇪🇹 Ethiopia</option>
+                  <option value="Japan">🇯🇵 Japan</option>
+                  <option value="Egypt">🇪🇬 Egypt</option>
+                  <option value="Mexico">🇲🇽 Mexico</option>
+                  <option value="USA">🇺🇸 USA</option>
+                </select>
+                <div class="error-msg" id="err-origin">Please select origin country.</div>
+              </div>
+
+              <div class="form-group" style="margin-bottom:0">
+                <label>Certifications <span class="optional">(select all that apply)</span></label>
+                <div class="cert-grid">
+                  <div class="cert-item">
+                    <input type="checkbox" id="cert1" value="USDA Organic" />
+                    <label class="cert-label" for="cert1">
+                      <div class="check-box"></div> 🌿 USDA Organic
+                    </label>
+                  </div>
+                  <div class="cert-item">
+                    <input type="checkbox" id="cert2" value="Non-GMO" />
+                    <label class="cert-label" for="cert2">
+                      <div class="check-box"></div> 🧬 Non-GMO
+                    </label>
+                  </div>
+                  <div class="cert-item">
+                    <input type="checkbox" id="cert3" value="Fair Trade" />
+                    <label class="cert-label" for="cert3">
+                      <div class="check-box"></div> 🤝 Fair Trade
+                    </label>
+                  </div>
+                  <div class="cert-item">
+                    <input type="checkbox" id="cert4" value="Rainforest Alliance" />
+                    <label class="cert-label" for="cert4">
+                      <div class="check-box"></div> 🦜 Rainforest Alliance
+                    </label>
+                  </div>
+                  <div class="cert-item">
+                    <input type="checkbox" id="cert5" value="Kosher" />
+                    <label class="cert-label" for="cert5">
+                      <div class="check-box"></div> ✡️ Kosher
+                    </label>
+                  </div>
+                  <div class="cert-item">
+                    <input type="checkbox" id="cert6" value="Halal" />
+                    <label class="cert-label" for="cert6">
+                      <div class="check-box"></div> ☪️ Halal
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- SECTION 4: TAGS -->
+          <div class="form-section">
+            <div class="form-section-header">
+              <span class="form-section-icon">🏷️</span>
+              <span class="form-section-title">Product Tags</span>
+              <span class="form-section-desc">Helps with search &amp; discovery</span>
+            </div>
+            <div class="form-section-body">
+              <div class="tags-container" id="tagsContainer"></div>
+              <input type="text" id="tagInput" placeholder="Type a tag and press Enter or comma…" />
+              <div class="input-hint">💡 E.g. organic, superfood, anti-inflammatory, gluten-free</div>
+            </div>
+          </div>
+
+        </div><!-- /left column -->
+
+        <!-- RIGHT COLUMN (sticky sidebar panel) -->
+        <div class="sidebar-panel">
+
+          <!-- IMAGE -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">📸 Product Image</div>
+            </div>
+            <div class="panel-body">
+              <div class="image-preview-box" id="imagePreviewBox">
+                <div class="img-placeholder" id="imgPlaceholder">
+                  <div class="ph-icon">🖼️</div>
+                  <p>Image preview will appear here</p>
+                </div>
+                <img id="imagePreview" src="" alt="Preview" style="display:none;width:100%;height:100%;object-fit:cover;" />
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label for="productImage">Image URL</label>
+                <input type="url" id="productImage" placeholder="https://images.unsplash.com/…" />
+                <div class="input-hint">🌐 Use Unsplash: <code style="color:var(--gold)">?w=400&q=80</code></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PUBLISH -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">🚀 Publish</div>
+            </div>
+            <div class="panel-body">
+              <div style="font-size:0.8rem;color:var(--text2);margin-bottom:16px;line-height:1.6;">
+                Your product will be immediately visible to customers once published. Ensure all required fields are complete.
+              </div>
+
+              <div style="display:flex;align-items:center;gap:10px;padding:12px;background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.15);border-radius:10px;margin-bottom:16px;">
+                <span style="font-size:1rem;">✅</span>
+                <span style="font-size:0.8rem;color:#34d399;">Products are immediately live after publishing</span>
+              </div>
+
+              <button type="submit" class="btn-submit" id="submitBtn">
+                <span>🌿</span> <span id="submitLabel">Publish Product</span>
+              </button>
+
+              <a href="my-products.html" class="btn-cancel">
+                ↩ Cancel &amp; Go Back
+              </a>
+            </div>
+          </div>
+
+          <!-- TIPS -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">💡 Pro Tips</div>
+            </div>
+            <div class="panel-body">
+              <ul style="list-style:none;display:flex;flex-direction:column;gap:10px;">
+                <li style="display:flex;gap:8px;font-size:0.78rem;color:var(--text2);">
+                  <span>📸</span>
+                  <span>Use high-quality product images — listings with images sell 3× more</span>
+                </li>
+                <li style="display:flex;gap:8px;font-size:0.78rem;color:var(--text2);">
+                  <span>📝</span>
+                  <span>Detailed descriptions build customer trust and reduce returns</span>
+                </li>
+                <li style="display:flex;gap:8px;font-size:0.78rem;color:var(--text2);">
+                  <span>🏷️</span>
+                  <span>Add 5–10 relevant tags to boost search visibility</span>
+                </li>
+                <li style="display:flex;gap:8px;font-size:0.78rem;color:var(--text2);">
+                  <span>🌍</span>
+                  <span>Always include all applicable certifications — customers filter by them</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+        </div><!-- /right column -->
+
+      </div><!-- /form-grid -->
+    </form>
+  </div>
+</main>
+
+<div id="toast-container"></div>
+
+<script src="../js/store.js"></script>
+<script>
+  // ── Toast ──────────────────────────────────────────────
+  function showToast(msg, type = 'info') {
+    const c = document.getElementById('toast-container');
+    const icons = { success:'✅', error:'❌', warning:'⚠️', info:'🌿' };
+    const t = document.createElement('div');
+    t.className = `toast toast-${type}`;
+    t.innerHTML = `<span class="toast-icon">${icons[type]||'🌿'}</span><span class="toast-msg">${msg}</span>`;
+    c.appendChild(t);
+    setTimeout(() => { t.classList.add('hide'); setTimeout(() => t.remove(), 300); }, 3000);
+  }
+
+  // ── Auth ──────────────────────────────────────────────
+  const user = Store.requireAuth(['vendor'], '../auth.html');
+  if (!user) throw new Error('Not authorized');
+
+  document.getElementById('sidebarName').textContent = user.name;
+  document.getElementById('sidebarAvatar').textContent = user.avatar || user.name.charAt(0);
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    Store.logout();
+    window.location.href = '../auth.html';
+  });
+
+  // ── Edit Mode Detection ────────────────────────────────
+  const params = new URLSearchParams(location.search);
+  const editId = params.get('id');
+  let editProduct = null;
+  let tags = [];
+
+  if (editId) {
+    editProduct = Store.getProductById(editId);
+    if (!editProduct || editProduct.vendorId !== user.id) {
+      showToast('Product not found or access denied.', 'error');
+      setTimeout(() => window.location.href = 'my-products.html', 2000);
+    } else {
+      // Switch to Edit mode UI
+      document.getElementById('pageTitle').textContent = '✏️ Edit Product';
+      document.getElementById('breadcrumbLabel').textContent = 'Edit Product';
+      document.getElementById('editBanner').style.display = 'flex';
+      document.getElementById('submitLabel').textContent = 'Update Product';
+      document.getElementById('addProductNav').classList.remove('active');
+      document.getElementById('myProductsNav').classList.add('active');
+      prefillForm(editProduct);
+    }
+  }
+
+  function prefillForm(p) {
+    document.getElementById('productName').value        = p.name || '';
+    document.getElementById('productCategory').value    = p.category || '';
+    document.getElementById('productDescription').value = p.description || '';
+    document.getElementById('productLongDesc').value    = p.longDescription || '';
+    document.getElementById('productPrice').value       = p.price || '';
+    document.getElementById('productSalePrice').value   = p.salePrice || '';
+    document.getElementById('productUnit').value        = p.unit || '';
+    document.getElementById('productMoq').value         = p.moq || '';
+    document.getElementById('productStock').value       = p.stock || '';
+    document.getElementById('productOrigin').value      = p.origin || '';
+    document.getElementById('productImage').value       = p.image || '';
+
+    // Certifications
+    (p.certifications || []).forEach(cert => {
+      const cb = document.querySelector(`input[value="${cert}"]`);
+      if (cb) cb.checked = true;
+    });
+
+    // Tags
+    tags = [...(p.tags || [])];
+    renderTags();
+
+    // Image preview
+    if (p.image) previewImage(p.image);
+
+    // Stock bar
+    updateStockBar(p.stock);
+  }
+
+  // ── Image Preview ──────────────────────────────────────
+  function previewImage(url) {
+    const img = document.getElementById('imagePreview');
+    const ph  = document.getElementById('imgPlaceholder');
+    const box = document.getElementById('imagePreviewBox');
+    if (!url) {
+      img.style.display = 'none';
+      ph.style.display = 'block';
+      box.classList.remove('has-image');
+      return;
+    }
+    img.onload = () => {
+      img.style.display = 'block';
+      ph.style.display  = 'none';
+      box.classList.add('has-image');
+    };
+    img.onerror = () => {
+      img.style.display = 'none';
+      ph.style.display  = 'block';
+      box.classList.remove('has-image');
+      showToast('Could not load image from that URL.', 'warning');
+    };
+    img.src = url;
+  }
+
+  document.getElementById('productImage').addEventListener('input', function() {
+    clearTimeout(this._t);
+    this._t = setTimeout(() => previewImage(this.value.trim()), 600);
+  });
+
+  // ── Stock Bar ─────────────────────────────────────────
+  function updateStockBar(qty) {
+    const wrap = document.getElementById('stockBarWrap');
+    const fill = document.getElementById('stockFill');
+    const hint = document.getElementById('stockHint');
+    qty = parseInt(qty) || 0;
+    if (qty <= 0) {
+      wrap.style.display = 'none';
+      return;
+    }
+    wrap.style.display = 'block';
+    const pct = Math.min(100, (qty / 1000) * 100);
+    let color = '#34d399';
+    let label = `✅ Well stocked (${qty} units)`;
+    if (qty < 10)       { color = '#f87171'; label = `🔴 Critical: only ${qty} left`; }
+    else if (qty < 20)  { color = '#f59e0b'; label = `⚠️ Low stock: ${qty} units`; }
+    fill.style.width = pct + '%';
+    fill.style.background = color;
+    hint.textContent = label;
+    hint.style.color = color;
+  }
+
+  document.getElementById('productStock').addEventListener('input', function() {
+    updateStockBar(this.value);
+  });
+
+  // ── Tags ──────────────────────────────────────────────
+  function renderTags() {
+    const container = document.getElementById('tagsContainer');
+    container.innerHTML = tags.map((t, i) => `
+      <div class="tag-pill">
+        <span>${t}</span>
+        <span class="remove" data-i="${i}" title="Remove">✕</span>
+      </div>
+    `).join('');
+    container.querySelectorAll('.remove').forEach(btn => {
+      btn.addEventListener('click', () => {
+        tags.splice(parseInt(btn.dataset.i), 1);
+        renderTags();
+      });
+    });
+  }
+
+  document.getElementById('tagInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const val = this.value.replace(/,/g, '').trim().toLowerCase();
+      if (val && !tags.includes(val)) {
+        tags.push(val);
+        renderTags();
+      }
+      this.value = '';
+    }
+  });
+
+  // ── Validation ────────────────────────────────────────
+  function validate() {
+    let valid = true;
+    const checks = [
+      { id: 'productName',     errId: 'err-name',     test: v => v.trim().length > 0 },
+      { id: 'productCategory', errId: 'err-category',  test: v => v !== '' },
+      { id: 'productDescription', errId: 'err-description', test: v => v.trim().length > 0 },
+      { id: 'productPrice',    errId: 'err-price',     test: v => parseFloat(v) > 0 },
+      { id: 'productUnit',     errId: 'err-unit',      test: v => v !== '' },
+      { id: 'productMoq',      errId: 'err-moq',       test: v => parseFloat(v) > 0 },
+      { id: 'productStock',    errId: 'err-stock',     test: v => parseInt(v) >= 0 },
+      { id: 'productOrigin',   errId: 'err-origin',    test: v => v !== '' },
+    ];
+
+    checks.forEach(({ id, errId, test }) => {
+      const el  = document.getElementById(id);
+      const err = document.getElementById(errId);
+      if (!test(el.value)) {
+        el.classList.add('error');
+        err.classList.add('show');
+        valid = false;
+      } else {
+        el.classList.remove('error');
+        err.classList.remove('show');
+      }
+    });
+
+    // Sale price check
+    const price = parseFloat(document.getElementById('productPrice').value);
+    const sale  = parseFloat(document.getElementById('productSalePrice').value);
+    if (sale && sale >= price) {
+      document.getElementById('productSalePrice').classList.add('error');
+      showToast('Sale price must be less than regular price.', 'warning');
+      valid = false;
+    } else {
+      document.getElementById('productSalePrice').classList.remove('error');
+    }
+
+    return valid;
+  }
+
+  // Clear errors on input
+  ['productName','productCategory','productDescription','productPrice','productUnit','productMoq','productStock','productOrigin'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', () => {
+        el.classList.remove('error');
+        const err = document.querySelector(`[id^="err-"]`);
+      });
+      el.addEventListener('change', () => el.classList.remove('error'));
+    }
+  });
+
+  // ── FORM SUBMIT ───────────────────────────────────────
+  document.getElementById('productForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (!validate()) {
+      showToast('Please fill in all required fields.', 'error');
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span>⏳</span> Saving…';
+
+    const certifications = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(c => c.value);
+
+    const data = {
+      name:            document.getElementById('productName').value.trim(),
+      category:        document.getElementById('productCategory').value,
+      description:     document.getElementById('productDescription').value.trim(),
+      longDescription: document.getElementById('productLongDesc').value.trim(),
+      price:           parseFloat(document.getElementById('productPrice').value),
+      salePrice:       parseFloat(document.getElementById('productSalePrice').value) || null,
+      unit:            document.getElementById('productUnit').value,
+      moq:             parseFloat(document.getElementById('productMoq').value),
+      stock:           parseInt(document.getElementById('productStock').value),
+      origin:          document.getElementById('productOrigin').value,
+      image:           document.getElementById('productImage').value.trim() || null,
+      certifications,
+      tags,
+      vendorId:        user.id,
+    };
+
+    setTimeout(() => {
+      try {
+        if (editId && editProduct) {
+          Store.updateProduct(editId, data);
+          showToast('Product updated successfully! 🌿', 'success');
+        } else {
+          Store.addProduct(data);
+          showToast('Product published! 🎉', 'success');
+        }
+        setTimeout(() => window.location.href = 'my-products.html', 1500);
+      } catch (err) {
+        console.error(err);
+        showToast('Something went wrong. Please try again.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = `<span>🌿</span> <span>${editId ? 'Update' : 'Publish'} Product</span>`;
+      }
+    }, 600);
+  });
+</script>
+</body>
+</html>

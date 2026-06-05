@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Products — OrganicTrade Admin</title>
+  <link rel="stylesheet" href="../css/main.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    body{display:flex;min-height:100vh;background:#0a1a0d;overflow-x:hidden;}
+    .sidebar{width:260px;min-height:100vh;flex-shrink:0;background:linear-gradient(180deg,#071009 0%,#0a1a0d 40%,#0d2010 100%);border-right:1px solid rgba(201,168,76,0.15);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100;transition:transform .3s ease;}
+    .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(201,168,76,0.1);display:flex;align-items:center;gap:12px;}
+    .logo-icon{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#c9a84c,#4aaa5e);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;}
+    .logo-text{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:#f0ebe0;line-height:1.2;}
+    .logo-text span{color:#c9a84c;}
+    .logo-sub{font-size:.65rem;color:#7a9080;text-transform:uppercase;letter-spacing:.1em;}
+    .sidebar-nav{flex:1;padding:16px 0;overflow-y:auto;}
+    .nav-section-label{font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.15em;color:#7a9080;padding:12px 20px 6px;margin-top:8px;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;margin:2px 10px;border-radius:10px;color:#b8c4b0;font-size:.875rem;font-weight:500;text-decoration:none;transition:all .2s ease;cursor:pointer;border:1px solid transparent;}
+    .nav-item:hover{background:rgba(201,168,76,0.08);color:#f0ebe0;border-color:rgba(201,168,76,0.1);}
+    .nav-item.active{background:linear-gradient(135deg,rgba(201,168,76,0.18),rgba(201,168,76,0.06));color:#c9a84c;border-color:rgba(201,168,76,0.25);}
+    .nav-item .nav-icon{font-size:1.1rem;width:22px;text-align:center;flex-shrink:0;}
+    .sidebar-user{padding:16px;border-top:1px solid rgba(201,168,76,0.1);display:flex;align-items:center;gap:12px;}
+    .user-avatar{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#c9a84c,#a07d30);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;color:#0a1a0d;flex-shrink:0;}
+    .user-info{flex:1;min-width:0;}
+    .user-name{font-size:.8rem;font-weight:600;color:#f0ebe0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{font-size:.65rem;color:#7a9080;text-transform:uppercase;letter-spacing:.05em;}
+    .logout-btn{width:30px;height:30px;border-radius:7px;background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.2);color:#e74c3c;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;transition:all .2s;flex-shrink:0;}
+    .logout-btn:hover{background:rgba(231,76,60,0.2);}
+    .main-content{margin-left:260px;flex:1;min-height:100vh;display:flex;flex-direction:column;}
+    .topbar{padding:16px 28px;display:flex;align-items:center;justify-content:space-between;background:rgba(10,26,13,0.8);backdrop-filter:blur(10px);border-bottom:1px solid rgba(201,168,76,0.1);position:sticky;top:0;z-index:50;}
+    .topbar-left h1{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:#f0ebe0;}
+    .topbar-left p{font-size:.75rem;color:#7a9080;margin-top:1px;}
+    .topbar-right{display:flex;align-items:center;gap:12px;}
+    .admin-avatar{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#c9a84c,#a07d30);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;color:#0a1a0d;}
+    .topbar-name{font-size:.8rem;font-weight:600;color:#f0ebe0;}
+    .content-area{padding:24px 28px;flex:1;}
+    .mobile-menu-btn{display:none;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);color:#c9a84c;width:36px;height:36px;border-radius:8px;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;}
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;}
+    @media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sidebar-overlay{display:block;opacity:0;pointer-events:none;transition:opacity .3s}.sidebar-overlay.open{opacity:1;pointer-events:all}.main-content{margin-left:0}.mobile-menu-btn{display:flex}}
+
+    /* Stats */
+    .stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+    @media(max-width:800px){.stats-bar{grid-template-columns:repeat(2,1fr);}}
+    .stat-card{background:linear-gradient(135deg,rgba(18,40,22,0.9),rgba(14,32,18,0.9));border:1px solid rgba(201,168,76,0.12);border-radius:12px;padding:16px;text-align:center;transition:all .2s;}
+    .stat-card:hover{border-color:rgba(201,168,76,0.3);transform:translateY(-2px);}
+    .s-val{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:#f0ebe0;}
+    .s-lbl{font-size:.65rem;color:#7a9080;text-transform:uppercase;letter-spacing:.06em;margin-top:3px;}
+
+    /* Toolbar */
+    .toolbar{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
+    .search-wrap{position:relative;flex:1;min-width:180px;}
+    .search-wrap input{width:100%;padding:10px 14px 10px 36px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.15);border-radius:10px;color:#f0ebe0;font-size:.85rem;outline:none;transition:all .2s;}
+    .search-wrap input:focus{border-color:#c9a84c;background:rgba(201,168,76,0.05);}
+    .search-wrap input::placeholder{color:#7a9080;}
+    .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#7a9080;}
+    .filter-select{padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.15);border-radius:10px;color:#f0ebe0;font-size:.82rem;outline:none;cursor:pointer;transition:all .2s;}
+    .filter-select:focus{border-color:#c9a84c;}
+    .filter-select option{background:#0f2614;color:#f0ebe0;}
+    .add-btn{padding:10px 18px;border-radius:10px;background:linear-gradient(135deg,#c9a84c,#a07d30);color:#0a1a0d;font-size:.82rem;font-weight:700;border:none;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+    .add-btn:hover{transform:translateY(-2px);box-shadow:0 5px 20px rgba(201,168,76,0.3);}
+
+    /* Table */
+    .section-card{background:linear-gradient(135deg,rgba(18,40,22,0.7),rgba(14,32,18,0.7));border:1px solid rgba(201,168,76,0.12);border-radius:16px;overflow:hidden;}
+    .admin-table{width:100%;border-collapse:collapse;font-size:.8rem;}
+    .admin-table thead{background:rgba(255,255,255,0.02);}
+    .admin-table th{padding:11px 14px;text-align:left;font-weight:600;text-transform:uppercase;letter-spacing:.08em;font-size:.62rem;color:#c9a84c;white-space:nowrap;}
+    .admin-table td{padding:11px 14px;color:#b8c4b0;border-top:1px solid rgba(201,168,76,0.06);vertical-align:middle;}
+    .admin-table tr:hover td{background:rgba(201,168,76,0.03);}
+    .product-thumb{width:44px;height:44px;border-radius:8px;object-fit:cover;border:1px solid rgba(201,168,76,0.15);flex-shrink:0;}
+    .product-name-cell{display:flex;align-items:center;gap:10px;}
+    .product-name-info .p-name{font-size:.82rem;font-weight:500;color:#f0ebe0;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .product-name-info .p-origin{font-size:.65rem;color:#7a9080;}
+    .cat-badge{display:inline-block;padding:2px 8px;border-radius:5px;font-size:.62rem;font-weight:600;background:rgba(201,168,76,0.08);color:#c9a84c;border:1px solid rgba(201,168,76,0.15);}
+    .status-pill{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:999px;font-size:.62rem;font-weight:600;}
+    .pill-active{background:rgba(46,204,113,0.1);color:#2ecc71;border:1px solid rgba(46,204,113,0.2);}
+    .pill-inactive{background:rgba(231,76,60,0.1);color:#e74c3c;border:1px solid rgba(231,76,60,0.2);}
+    .stock-low{color:#e74c3c;font-weight:600;}
+    .stock-ok{color:#2ecc71;}
+    .featured-toggle{width:36px;height:20px;border-radius:10px;border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;display:inline-block;vertical-align:middle;}
+    .featured-on{background:linear-gradient(90deg,#c9a84c,#a07d30);}
+    .featured-off{background:rgba(255,255,255,0.1);}
+    .featured-toggle::after{content:'';position:absolute;top:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .2s;}
+    .featured-on::after{left:18px;}
+    .featured-off::after{left:2px;}
+    .actions-cell{display:flex;gap:5px;align-items:center;flex-wrap:nowrap;}
+    .action-btn{padding:5px 9px;border-radius:6px;font-size:.68rem;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid;display:inline-flex;align-items:center;gap:3px;background:transparent;}
+    .btn-edit{color:#c9a84c;border-color:rgba(201,168,76,0.2);background:rgba(201,168,76,0.06);}
+    .btn-edit:hover{background:rgba(201,168,76,0.16);}
+    .btn-toggle{color:#f39c12;border-color:rgba(243,156,18,0.2);background:rgba(243,156,18,0.06);}
+    .btn-toggle:hover{background:rgba(243,156,18,0.16);}
+    .btn-delete{color:#e74c3c;border-color:rgba(231,76,60,0.2);background:rgba(231,76,60,0.06);}
+    .btn-delete:hover{background:rgba(231,76,60,0.16);}
+
+    /* Modal */
+    .modal-overlay{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,0.8);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:all .25s;}
+    .modal-overlay.open{opacity:1;visibility:visible;}
+    .modal{background:#0d2010;border:1px solid rgba(201,168,76,0.25);border-radius:20px;width:100%;max-width:700px;max-height:90vh;overflow-y:auto;transform:scale(0.9) translateY(20px);transition:transform .3s cubic-bezier(0.34,1.56,0.64,1);}
+    .modal-overlay.open .modal{transform:scale(1) translateY(0);}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid rgba(201,168,76,0.1);position:sticky;top:0;background:#0d2010;z-index:10;}
+    .modal-title{font-family:'Playfair Display',serif;font-size:1.1rem;color:#f0ebe0;}
+    .modal-close{width:30px;height:30px;border-radius:7px;background:transparent;border:1px solid rgba(201,168,76,0.15);color:#b8c4b0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;transition:all .2s;}
+    .modal-close:hover{border-color:#e74c3c;color:#e74c3c;}
+    .modal-body{padding:24px;}
+    .modal-footer{padding:16px 24px;border-top:1px solid rgba(201,168,76,0.1);display:flex;gap:10px;justify-content:flex-end;position:sticky;bottom:0;background:#0d2010;}
+
+    /* Form */
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+    .form-group{margin-bottom:14px;}
+    .form-label{display:block;font-size:.7rem;font-weight:600;color:#b8c4b0;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;}
+    .form-control{width:100%;padding:9px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.15);border-radius:9px;color:#f0ebe0;font-family:'Inter',sans-serif;font-size:.85rem;outline:none;transition:all .2s;}
+    .form-control:focus{border-color:#c9a84c;background:rgba(201,168,76,0.04);box-shadow:0 0 0 3px rgba(201,168,76,0.08);}
+    .form-control::placeholder{color:#7a9080;}
+    .form-control option{background:#0f2614;color:#f0ebe0;}
+    textarea.form-control{resize:vertical;min-height:80px;line-height:1.5;}
+    .section-divider{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#c9a84c;margin:16px 0 10px;padding-bottom:6px;border-bottom:1px solid rgba(201,168,76,0.1);}
+    .certs-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+    .cert-item{display:flex;align-items:center;gap:7px;cursor:pointer;padding:6px 10px;border-radius:7px;border:1px solid rgba(201,168,76,0.1);background:rgba(255,255,255,0.02);transition:all .2s;}
+    .cert-item:hover{border-color:rgba(201,168,76,0.25);background:rgba(201,168,76,0.05);}
+    .cert-item input{accent-color:#c9a84c;}
+    .cert-item span{font-size:.78rem;color:#b8c4b0;}
+    .img-preview{width:100%;height:120px;border-radius:10px;object-fit:cover;border:1px solid rgba(201,168,76,0.15);margin-top:8px;display:none;}
+    .save-btn{padding:10px 24px;border-radius:9px;background:linear-gradient(135deg,#c9a84c,#a07d30);color:#0a1a0d;font-size:.85rem;font-weight:700;border:none;cursor:pointer;transition:all .2s;}
+    .save-btn:hover{transform:translateY(-1px);box-shadow:0 5px 15px rgba(201,168,76,0.3);}
+    .cancel-btn{padding:10px 18px;border-radius:9px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#b8c4b0;font-size:.82rem;cursor:pointer;transition:all .2s;}
+    .cancel-btn:hover{background:rgba(255,255,255,0.1);}
+
+    /* Confirm */
+    .confirm-overlay{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:all .2s;}
+    .confirm-overlay.open{opacity:1;visibility:visible;}
+    .confirm-box{background:#0f2614;border:1px solid rgba(231,76,60,0.3);border-radius:16px;padding:28px;max-width:360px;width:90%;text-align:center;}
+    .confirm-msg{font-size:.87rem;color:#b8c4b0;margin-bottom:20px;}
+    .confirm-btns{display:flex;gap:10px;justify-content:center;}
+    .btn-cancel-conf{padding:9px 20px;border-radius:9px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#b8c4b0;cursor:pointer;font-size:.82rem;}
+    .btn-confirm-del{padding:9px 20px;border-radius:9px;background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;border:none;cursor:pointer;font-size:.82rem;font-weight:600;}
+    .star-rating{color:#c9a84c;font-size:.75rem;}
+  </style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🌿</div>
+    <div>
+      <div class="logo-text">Organic<span>Trade</span></div>
+      <div class="logo-sub">Admin Portal</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main Menu</div>
+    <a class="nav-item" href="index.html"><span class="nav-icon">📊</span> Dashboard</a>
+    <a class="nav-item" href="orders.html"><span class="nav-icon">📦</span> Orders</a>
+    <a class="nav-item" href="users.html"><span class="nav-icon">👥</span> Users</a>
+    <a class="nav-item" href="vendors.html"><span class="nav-icon">🏪</span> Vendors</a>
+    <a class="nav-item active" href="products.html"><span class="nav-icon">🌿</span> Products</a>
+    <div class="nav-section-label">System</div>
+    <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> Settings</a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="user-avatar" id="sidebar-avatar">A</div>
+    <div class="user-info">
+      <div class="user-name" id="sidebar-name">Admin User</div>
+      <div class="user-role">Administrator</div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">🚪</button>
+  </div>
+</aside>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<div class="main-content">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-left">
+        <h1>🌿 Product Moderation</h1>
+        <p>Manage all products in the marketplace</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div><div class="topbar-name" id="topbar-name">Admin</div><div style="font-size:.7rem;color:#7a9080;">Administrator</div></div>
+      <div class="admin-avatar" id="topbar-avatar">A</div>
+    </div>
+  </div>
+
+  <div class="content-area">
+    <!-- Stats -->
+    <div class="stats-bar">
+      <div class="stat-card"><div class="s-val" id="stat-total">0</div><div class="s-lbl">🌿 Total Products</div></div>
+      <div class="stat-card"><div class="s-val" id="stat-active" style="color:#2ecc71">0</div><div class="s-lbl">✅ Active</div></div>
+      <div class="stat-card"><div class="s-val" id="stat-inactive" style="color:#e74c3c">0</div><div class="s-lbl">🚫 Inactive</div></div>
+      <div class="stat-card"><div class="s-val" id="stat-featured" style="color:#c9a84c">0</div><div class="s-lbl">⭐ Featured</div></div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Search products..." oninput="applyFilters()"/>
+      </div>
+      <select class="filter-select" id="cat-filter" onchange="applyFilters()">
+        <option value="all">All Categories</option>
+      </select>
+      <select class="filter-select" id="status-filter" onchange="applyFilters()">
+        <option value="all">All Status</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+        <option value="featured">Featured</option>
+      </select>
+      <button class="add-btn" onclick="openModal(null)">➕ Add Product</button>
+    </div>
+
+    <!-- Table -->
+    <div class="section-card">
+      <div style="overflow-x:auto;">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Category</th>
+              <th>Vendor</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Status</th>
+              <th>Featured</th>
+              <th>Rating</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="products-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Product Edit/Add Modal -->
+<div class="modal-overlay" id="product-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title">Add Product</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="section-divider">📌 Basic Information</div>
+      <div class="form-group">
+        <label class="form-label">Product Name *</label>
+        <input type="text" class="form-control" id="f-name" placeholder="e.g. Organic Turmeric Powder"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Category *</label>
+          <select class="form-control" id="f-category">
+            <option value="">Select category</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Origin *</label>
+          <select class="form-control" id="f-origin">
+            <option value="">Select origin</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Short Description *</label>
+        <textarea class="form-control" id="f-description" placeholder="Brief product description..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Long Description</label>
+        <textarea class="form-control" id="f-longdescription" placeholder="Detailed product information..." style="min-height:80px;"></textarea>
+      </div>
+
+      <div class="section-divider">💰 Pricing & Stock</div>
+      <div class="form-row-3">
+        <div class="form-group">
+          <label class="form-label">Price (USD) *</label>
+          <input type="number" class="form-control" id="f-price" placeholder="0.00" step="0.01" min="0"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sale Price (USD)</label>
+          <input type="number" class="form-control" id="f-saleprice" placeholder="0.00 (optional)" step="0.01" min="0"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Stock Qty *</label>
+          <input type="number" class="form-control" id="f-stock" placeholder="0" min="0"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Unit</label>
+          <input type="text" class="form-control" id="f-unit" placeholder="e.g. per kg, per liter"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Min. Order Qty (MOQ)</label>
+          <input type="number" class="form-control" id="f-moq" placeholder="1" min="0.1" step="0.1"/>
+        </div>
+      </div>
+
+      <div class="section-divider">🖼 Media</div>
+      <div class="form-group">
+        <label class="form-label">Image URL</label>
+        <input type="url" class="form-control" id="f-image" placeholder="https://images.unsplash.com/..." oninput="previewImage()"/>
+        <img id="img-preview" class="img-preview" alt="Preview"/>
+      </div>
+
+      <div class="section-divider">🏷 Tags & Certifications</div>
+      <div class="form-group">
+        <label class="form-label">Tags (comma-separated)</label>
+        <input type="text" class="form-control" id="f-tags" placeholder="organic, turmeric, spice, anti-inflammatory"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Certifications</label>
+        <div class="certs-grid" id="certs-grid">
+          <!-- populated by JS -->
+        </div>
+      </div>
+
+      <div class="section-divider">⚙️ Visibility</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-control" id="f-active">
+            <option value="true">✅ Active</option>
+            <option value="false">🚫 Inactive</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Featured</label>
+          <select class="form-control" id="f-featured">
+            <option value="false">No</option>
+            <option value="true">⭐ Yes</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+      <button class="save-btn" onclick="saveProduct()">💾 Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Delete -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div style="font-size:2.5rem;margin-bottom:12px;">🗑️</div>
+    <div style="font-family:'Playfair Display',serif;font-size:1.1rem;color:#f0ebe0;margin-bottom:8px;">Delete Product?</div>
+    <div class="confirm-msg" id="confirm-msg">This action cannot be undone.</div>
+    <div class="confirm-btns">
+      <button class="btn-cancel-conf" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-confirm-del" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="../js/store.js"></script>
+<script>
+  function showToast(msg,type='info'){
+    const c=document.getElementById('toast-container');
+    const icons={success:'✅',error:'❌',warning:'⚠️',info:'🌿'};
+    const t=document.createElement('div');
+    t.className=`toast toast-${type}`;
+    t.innerHTML=`<span class="toast-icon">${icons[type]||'🌿'}</span><span class="toast-msg">${msg}</span>`;
+    c.appendChild(t);
+    setTimeout(()=>{t.classList.add('hide');setTimeout(()=>t.remove(),300);},3000);
+  }
+
+  const adminUser=Store.requireAuth(['admin'],'../auth.html');
+  if(!adminUser) throw new Error();
+  document.getElementById('sidebar-avatar').textContent=adminUser.avatar||adminUser.name.charAt(0);
+  document.getElementById('sidebar-name').textContent=adminUser.name;
+  document.getElementById('topbar-avatar').textContent=adminUser.avatar||adminUser.name.charAt(0);
+  document.getElementById('topbar-name').textContent=adminUser.name;
+
+  function doLogout(){Store.logout();showToast('Logged out','success');setTimeout(()=>window.location.href='../auth.html',800);}
+  function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('open');}
+
+  const CERTIFICATIONS=['USDA Organic','Non-GMO','Fair Trade','Rainforest Alliance','Kosher','Halal'];
+  let currentEditId=null;
+  let pendingDeleteId=null;
+
+  // Populate selects
+  function initSelects(){
+    const catSel=document.getElementById('cat-filter');
+    const fCat=document.getElementById('f-category');
+    const fOrig=document.getElementById('f-origin');
+    Store.CATEGORIES.forEach(c=>{
+      catSel.innerHTML+=`<option value="${c}">${c}</option>`;
+      fCat.innerHTML+=`<option value="${c}">${c}</option>`;
+    });
+    Store.ORIGINS.forEach(o=>fOrig.innerHTML+=`<option value="${o}">${o}</option>`);
+    const certsEl=document.getElementById('certs-grid');
+    certsEl.innerHTML=CERTIFICATIONS.map(c=>`
+      <label class="cert-item">
+        <input type="checkbox" name="cert" value="${c}"/>
+        <span>🏅 ${c}</span>
+      </label>`).join('');
+  }
+
+  function loadStats(){
+    const products=Store.getProducts();
+    document.getElementById('stat-total').textContent=products.length;
+    document.getElementById('stat-active').textContent=products.filter(p=>p.active).length;
+    document.getElementById('stat-inactive').textContent=products.filter(p=>!p.active).length;
+    document.getElementById('stat-featured').textContent=products.filter(p=>p.featured).length;
+  }
+
+  function applyFilters(){
+    const q=document.getElementById('search-input').value.toLowerCase().trim();
+    const cat=document.getElementById('cat-filter').value;
+    const statusF=document.getElementById('status-filter').value;
+    let products=Store.getProducts();
+    if(cat!=='all') products=products.filter(p=>p.category===cat);
+    if(statusF==='active') products=products.filter(p=>p.active);
+    else if(statusF==='inactive') products=products.filter(p=>!p.active);
+    else if(statusF==='featured') products=products.filter(p=>p.featured);
+    if(q) products=products.filter(p=>p.name.toLowerCase().includes(q)||(p.description||'').toLowerCase().includes(q)||(p.tags||[]).some(t=>t.toLowerCase().includes(q)));
+    renderTable(products);
+  }
+
+  function renderStars(rating){
+    const full=Math.floor(rating||0);
+    const half=(rating%1)>=0.5?1:0;
+    let s='';
+    for(let i=0;i<full;i++) s+='★';
+    if(half) s+='☆';
+    return `<span class="star-rating">${s}</span><span style="font-size:.68rem;color:#7a9080;margin-left:3px;">${(rating||0).toFixed(1)}</span>`;
+  }
+
+  function renderTable(products){
+    const tbody=document.getElementById('products-tbody');
+    if(products.length===0){
+      tbody.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:30px;color:#7a9080;">No products found</td></tr>`;
+      return;
+    }
+    tbody.innerHTML=products.map(p=>{
+      const vendor=Store.getUserById(p.vendorId)||{name:'Unknown'};
+      const saleHtml=p.salePrice?`<div style="font-size:.68rem;color:#7a9080;text-decoration:line-through;">${Store.formatPrice(p.price)}</div><div style="color:#2ecc71;font-weight:600;">${Store.formatPrice(p.salePrice)}</div>`:`<div style="color:#c9a84c;font-weight:600;">${Store.formatPrice(p.price)}</div>`;
+      const stockCls=p.stock<50?'stock-low':'stock-ok';
+      return `<tr>
+        <td>
+          <div class="product-name-cell">
+            <img src="${p.image}" alt="${p.name}" class="product-thumb" onerror="this.style.display='none'"/>
+            <div class="product-name-info">
+              <div class="p-name" title="${p.name}">${p.name}</div>
+              <div class="p-origin">📍 ${p.origin} • 📦 MOQ: ${p.moq} ${p.unit||''}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="cat-badge">${p.category}</span></td>
+        <td style="font-size:.75rem;">${vendor.name}</td>
+        <td>${saleHtml}</td>
+        <td><span class="${stockCls}">${p.stock}</span></td>
+        <td><span class="status-pill ${p.active?'pill-active':'pill-inactive'}">${p.active?'✅ Active':'🚫 Inactive'}</span></td>
+        <td>
+          <button class="featured-toggle ${p.featured?'featured-on':'featured-off'}" onclick="toggleFeatured('${p.id}')" title="${p.featured?'Remove from featured':'Add to featured'}"></button>
+        </td>
+        <td>${renderStars(p.rating)} <span style="font-size:.65rem;color:#7a9080;">(${p.reviews||0})</span></td>
+        <td>
+          <div class="actions-cell">
+            <button class="action-btn btn-edit" onclick="openModal('${p.id}')">✏️ Edit</button>
+            <button class="action-btn btn-toggle" onclick="toggleActive('${p.id}')">${p.active?'🚫':'✅'}</button>
+            <button class="action-btn btn-delete" onclick="promptDelete('${p.id}','${p.name.replace(/'/g,"\\'")}')">🗑</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  function toggleFeatured(productId){
+    const p=Store.getProductById(productId);
+    if(!p) return;
+    Store.updateProduct(productId,{featured:!p.featured});
+    showToast(p.featured?'Removed from featured':'Added to featured ⭐','success');
+    loadStats();
+    applyFilters();
+  }
+
+  function toggleActive(productId){
+    const p=Store.getProductById(productId);
+    if(!p) return;
+    Store.updateProduct(productId,{active:!p.active});
+    showToast(`Product ${p.active?'deactivated':'activated'}`,'success');
+    loadStats();
+    applyFilters();
+  }
+
+  function promptDelete(productId,name){
+    pendingDeleteId=productId;
+    document.getElementById('confirm-msg').textContent=`Delete "${name}"? This cannot be undone.`;
+    document.getElementById('confirm-overlay').classList.add('open');
+  }
+
+  function closeConfirm(){document.getElementById('confirm-overlay').classList.remove('open');pendingDeleteId=null;}
+
+  function confirmDelete(){
+    if(!pendingDeleteId) return;
+    const p=Store.getProductById(pendingDeleteId);
+    Store.deleteProduct(pendingDeleteId);
+    showToast(`"${p?.name||'Product'}" deleted`,'success');
+    closeConfirm();
+    loadStats();
+    applyFilters();
+  }
+
+  function previewImage(){
+    const url=document.getElementById('f-image').value;
+    const preview=document.getElementById('img-preview');
+    if(url){preview.src=url;preview.style.display='block';}
+    else{preview.style.display='none';}
+  }
+
+  function openModal(productId){
+    currentEditId=productId;
+    const isEdit=!!productId;
+    document.getElementById('modal-title').textContent=isEdit?'✏️ Edit Product':'➕ Add New Product';
+
+    // Reset form
+    document.getElementById('f-name').value='';
+    document.getElementById('f-category').value='';
+    document.getElementById('f-origin').value='';
+    document.getElementById('f-description').value='';
+    document.getElementById('f-longdescription').value='';
+    document.getElementById('f-price').value='';
+    document.getElementById('f-saleprice').value='';
+    document.getElementById('f-stock').value='';
+    document.getElementById('f-unit').value='';
+    document.getElementById('f-moq').value='';
+    document.getElementById('f-image').value='';
+    document.getElementById('f-tags').value='';
+    document.getElementById('f-active').value='true';
+    document.getElementById('f-featured').value='false';
+    document.getElementById('img-preview').style.display='none';
+    document.querySelectorAll('#certs-grid input[type=checkbox]').forEach(cb=>cb.checked=false);
+
+    if(isEdit){
+      const p=Store.getProductById(productId);
+      if(!p) return;
+      document.getElementById('f-name').value=p.name||'';
+      document.getElementById('f-category').value=p.category||'';
+      document.getElementById('f-origin').value=p.origin||'';
+      document.getElementById('f-description').value=p.description||'';
+      document.getElementById('f-longdescription').value=p.longDescription||'';
+      document.getElementById('f-price').value=p.price||'';
+      document.getElementById('f-saleprice').value=p.salePrice||'';
+      document.getElementById('f-stock').value=p.stock||'';
+      document.getElementById('f-unit').value=p.unit||'';
+      document.getElementById('f-moq').value=p.moq||'';
+      document.getElementById('f-image').value=p.image||'';
+      document.getElementById('f-tags').value=(p.tags||[]).join(', ');
+      document.getElementById('f-active').value=String(p.active!==false);
+      document.getElementById('f-featured').value=String(p.featured===true);
+      if(p.image){document.getElementById('img-preview').src=p.image;document.getElementById('img-preview').style.display='block';}
+      (p.certifications||[]).forEach(cert=>{
+        const cb=document.querySelector(`#certs-grid input[value="${cert}"]`);
+        if(cb) cb.checked=true;
+      });
+    }
+    document.getElementById('product-modal').classList.add('open');
+  }
+
+  function closeModal(){
+    document.getElementById('product-modal').classList.remove('open');
+    currentEditId=null;
+  }
+
+  function saveProduct(){
+    const name=document.getElementById('f-name').value.trim();
+    const category=document.getElementById('f-category').value;
+    const origin=document.getElementById('f-origin').value;
+    const description=document.getElementById('f-description').value.trim();
+    const price=parseFloat(document.getElementById('f-price').value);
+    const salePrice=parseFloat(document.getElementById('f-saleprice').value)||null;
+    const stock=parseInt(document.getElementById('f-stock').value)||0;
+
+    if(!name){showToast('Product name is required','error');return;}
+    if(!category){showToast('Please select a category','error');return;}
+    if(!origin){showToast('Please select an origin','error');return;}
+    if(!description){showToast('Description is required','error');return;}
+    if(!price||price<=0){showToast('Valid price is required','error');return;}
+
+    const certs=Array.from(document.querySelectorAll('#certs-grid input:checked')).map(cb=>cb.value);
+    const tags=document.getElementById('f-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+
+    const data={
+      name,category,origin,description,
+      longDescription:document.getElementById('f-longdescription').value.trim(),
+      price,salePrice,stock,
+      unit:document.getElementById('f-unit').value.trim()||'per unit',
+      moq:parseFloat(document.getElementById('f-moq').value)||1,
+      image:document.getElementById('f-image').value.trim(),
+      tags,certifications:certs,
+      active:document.getElementById('f-active').value==='true',
+      featured:document.getElementById('f-featured').value==='true',
+      vendorId:adminUser.id
+    };
+
+    if(currentEditId){
+      Store.updateProduct(currentEditId,data);
+      showToast(`"${name}" updated successfully ✅`,'success');
+    } else {
+      Store.addProduct(data);
+      showToast(`"${name}" added successfully ✅`,'success');
+    }
+
+    closeModal();
+    loadStats();
+    applyFilters();
+  }
+
+  document.getElementById('product-modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+  initSelects();
+  loadStats();
+  applyFilters();
+</script>
+</body>
+</html>

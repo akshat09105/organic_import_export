@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Settings — OrganicTrade Admin</title>
+  <link rel="stylesheet" href="../css/main.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    body{display:flex;min-height:100vh;background:#0a1a0d;overflow-x:hidden;}
+    .sidebar{width:260px;min-height:100vh;flex-shrink:0;background:linear-gradient(180deg,#071009 0%,#0a1a0d 40%,#0d2010 100%);border-right:1px solid rgba(201,168,76,0.15);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100;transition:transform .3s ease;}
+    .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(201,168,76,0.1);display:flex;align-items:center;gap:12px;}
+    .logo-icon{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#c9a84c,#4aaa5e);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;}
+    .logo-text{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:#f0ebe0;line-height:1.2;}
+    .logo-text span{color:#c9a84c;}
+    .logo-sub{font-size:.65rem;color:#7a9080;text-transform:uppercase;letter-spacing:.1em;}
+    .sidebar-nav{flex:1;padding:16px 0;overflow-y:auto;}
+    .nav-section-label{font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.15em;color:#7a9080;padding:12px 20px 6px;margin-top:8px;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;margin:2px 10px;border-radius:10px;color:#b8c4b0;font-size:.875rem;font-weight:500;text-decoration:none;transition:all .2s ease;cursor:pointer;border:1px solid transparent;}
+    .nav-item:hover{background:rgba(201,168,76,0.08);color:#f0ebe0;border-color:rgba(201,168,76,0.1);}
+    .nav-item.active{background:linear-gradient(135deg,rgba(201,168,76,0.18),rgba(201,168,76,0.06));color:#c9a84c;border-color:rgba(201,168,76,0.25);}
+    .nav-item .nav-icon{font-size:1.1rem;width:22px;text-align:center;flex-shrink:0;}
+    .sidebar-user{padding:16px;border-top:1px solid rgba(201,168,76,0.1);display:flex;align-items:center;gap:12px;}
+    .user-avatar{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#c9a84c,#a07d30);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;color:#0a1a0d;flex-shrink:0;}
+    .user-info{flex:1;min-width:0;}
+    .user-name{font-size:.8rem;font-weight:600;color:#f0ebe0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{font-size:.65rem;color:#7a9080;text-transform:uppercase;letter-spacing:.05em;}
+    .logout-btn{width:30px;height:30px;border-radius:7px;background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.2);color:#e74c3c;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;transition:all .2s;flex-shrink:0;}
+    .logout-btn:hover{background:rgba(231,76,60,0.2);}
+    .main-content{margin-left:260px;flex:1;min-height:100vh;display:flex;flex-direction:column;}
+    .topbar{padding:16px 28px;display:flex;align-items:center;justify-content:space-between;background:rgba(10,26,13,0.8);backdrop-filter:blur(10px);border-bottom:1px solid rgba(201,168,76,0.1);position:sticky;top:0;z-index:50;}
+    .topbar-left h1{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:#f0ebe0;}
+    .topbar-left p{font-size:.75rem;color:#7a9080;margin-top:1px;}
+    .topbar-right{display:flex;align-items:center;gap:12px;}
+    .admin-avatar{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#c9a84c,#a07d30);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;color:#0a1a0d;}
+    .topbar-name{font-size:.8rem;font-weight:600;color:#f0ebe0;}
+    .content-area{padding:24px 28px;flex:1;}
+    .mobile-menu-btn{display:none;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);color:#c9a84c;width:36px;height:36px;border-radius:8px;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;}
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;}
+    @media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sidebar-overlay{display:block;opacity:0;pointer-events:none;transition:opacity .3s}.sidebar-overlay.open{opacity:1;pointer-events:all}.main-content{margin-left:0}.mobile-menu-btn{display:flex}}
+
+    /* Settings Layout */
+    .settings-layout{display:grid;grid-template-columns:220px 1fr;gap:20px;}
+    @media(max-width:900px){.settings-layout{grid-template-columns:1fr;}}
+    .settings-nav{background:linear-gradient(135deg,rgba(18,40,22,0.8),rgba(14,32,18,0.8));border:1px solid rgba(201,168,76,0.12);border-radius:14px;padding:12px;height:fit-content;position:sticky;top:84px;}
+    .settings-nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;color:#b8c4b0;font-size:.82rem;font-weight:500;cursor:pointer;transition:all .2s;border:1px solid transparent;margin-bottom:3px;}
+    .settings-nav-item:hover{background:rgba(201,168,76,0.07);color:#f0ebe0;}
+    .settings-nav-item.active{background:rgba(201,168,76,0.12);color:#c9a84c;border-color:rgba(201,168,76,0.2);}
+    .settings-nav-icon{font-size:1rem;width:20px;text-align:center;}
+
+    /* Sections */
+    .settings-section{display:none;}
+    .settings-section.active{display:block;}
+    .section-card{background:linear-gradient(135deg,rgba(18,40,22,0.7),rgba(14,32,18,0.7));border:1px solid rgba(201,168,76,0.12);border-radius:16px;overflow:hidden;margin-bottom:18px;}
+    .section-card-header{padding:16px 20px;border-bottom:1px solid rgba(201,168,76,0.08);display:flex;align-items:center;gap:10px;}
+    .section-card-header h3{font-family:'Playfair Display',serif;font-size:.95rem;color:#f0ebe0;font-weight:600;}
+    .section-card-body{padding:20px;}
+
+    /* Forms */
+    .form-group{margin-bottom:16px;}
+    .form-label{display:block;font-size:.7rem;font-weight:600;color:#b8c4b0;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;}
+    .form-control{width:100%;padding:9px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.15);border-radius:9px;color:#f0ebe0;font-family:'Inter',sans-serif;font-size:.85rem;outline:none;transition:all .2s;}
+    .form-control:focus{border-color:#c9a84c;background:rgba(201,168,76,0.04);box-shadow:0 0 0 3px rgba(201,168,76,0.08);}
+    .form-control::placeholder{color:#7a9080;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .form-hint{font-size:.68rem;color:#7a9080;margin-top:4px;}
+    .save-btn{padding:9px 22px;border-radius:9px;background:linear-gradient(135deg,#c9a84c,#a07d30);color:#0a1a0d;font-size:.82rem;font-weight:700;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+    .save-btn:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(201,168,76,0.3);}
+    .danger-btn{padding:9px 22px;border-radius:9px;background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;font-size:.82rem;font-weight:700;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+    .danger-btn:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(231,76,60,0.3);}
+
+    /* Toggle Switch */
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(201,168,76,0.06);}
+    .toggle-row:last-child{border-bottom:none;}
+    .toggle-info .toggle-label{font-size:.85rem;color:#f0ebe0;font-weight:500;}
+    .toggle-info .toggle-desc{font-size:.72rem;color:#7a9080;margin-top:2px;}
+    .toggle-switch{width:44px;height:24px;border-radius:12px;border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
+    .toggle-on{background:linear-gradient(90deg,#c9a84c,#a07d30);}
+    .toggle-off{background:rgba(255,255,255,0.1);}
+    .toggle-switch::after{content:'';position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,0.3);}
+    .toggle-on::after{left:22px;}
+    .toggle-off::after{left:2px;}
+
+    /* Admin profile */
+    .profile-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
+    .profile-avatar-big{width:64px;height:64px;border-radius:14px;background:linear-gradient(135deg,#c9a84c,#a07d30);display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:700;color:#0a1a0d;}
+    .profile-meta .p-name{font-family:'Playfair Display',serif;font-size:1rem;color:#f0ebe0;font-weight:600;}
+    .profile-meta .p-email{font-size:.75rem;color:#7a9080;margin-top:2px;}
+    .profile-meta .p-role{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:6px;background:rgba(201,168,76,0.1);color:#c9a84c;font-size:.65rem;font-weight:600;text-transform:uppercase;margin-top:5px;}
+
+    /* Info Boxes */
+    .info-box{background:rgba(52,152,219,0.06);border:1px solid rgba(52,152,219,0.15);border-radius:10px;padding:14px;display:flex;gap:10px;margin-bottom:16px;}
+    .info-box-icon{font-size:1.2rem;flex-shrink:0;}
+    .info-box-text{font-size:.78rem;color:#b8c4b0;line-height:1.5;}
+    .danger-zone{background:rgba(231,76,60,0.05);border:1px solid rgba(231,76,60,0.2);border-radius:12px;padding:16px;}
+    .danger-zone h4{color:#e74c3c;font-size:.85rem;margin-bottom:6px;}
+    .danger-zone p{font-size:.75rem;color:#b8c4b0;margin-bottom:12px;}
+
+    /* Store Settings */
+    .setting-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(201,168,76,0.06);}
+    .setting-row:last-child{border-bottom:none;}
+    .setting-label{font-size:.83rem;color:#f0ebe0;font-weight:500;}
+    .setting-sub{font-size:.7rem;color:#7a9080;margin-top:2px;}
+    .setting-value{font-size:.82rem;color:#c9a84c;font-weight:600;}
+  </style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🌿</div>
+    <div>
+      <div class="logo-text">Organic<span>Trade</span></div>
+      <div class="logo-sub">Admin Portal</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main Menu</div>
+    <a class="nav-item" href="index.html"><span class="nav-icon">📊</span> Dashboard</a>
+    <a class="nav-item" href="orders.html"><span class="nav-icon">📦</span> Orders</a>
+    <a class="nav-item" href="users.html"><span class="nav-icon">👥</span> Users</a>
+    <a class="nav-item" href="vendors.html"><span class="nav-icon">🏪</span> Vendors</a>
+    <a class="nav-item" href="products.html"><span class="nav-icon">🌿</span> Products</a>
+    <div class="nav-section-label">System</div>
+    <a class="nav-item active" href="settings.html"><span class="nav-icon">⚙️</span> Settings</a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="user-avatar" id="sidebar-avatar">A</div>
+    <div class="user-info">
+      <div class="user-name" id="sidebar-name">Admin User</div>
+      <div class="user-role">Administrator</div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">🚪</button>
+  </div>
+</aside>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<div class="main-content">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-left">
+        <h1>⚙️ Settings</h1>
+        <p>Configure your OrganicTrade admin portal</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div><div class="topbar-name" id="topbar-name">Admin</div><div style="font-size:.7rem;color:#7a9080;">Administrator</div></div>
+      <div class="admin-avatar" id="topbar-avatar">A</div>
+    </div>
+  </div>
+
+  <div class="content-area">
+    <div class="settings-layout">
+
+      <!-- Settings Nav -->
+      <nav class="settings-nav">
+        <div class="settings-nav-item active" onclick="showSection('profile',this)">
+          <span class="settings-nav-icon">👤</span> Profile
+        </div>
+        <div class="settings-nav-item" onclick="showSection('store',this)">
+          <span class="settings-nav-icon">🏪</span> Store
+        </div>
+        <div class="settings-nav-item" onclick="showSection('notifications',this)">
+          <span class="settings-nav-icon">🔔</span> Notifications
+        </div>
+        <div class="settings-nav-item" onclick="showSection('security',this)">
+          <span class="settings-nav-icon">🔒</span> Security
+        </div>
+        <div class="settings-nav-item" onclick="showSection('data',this)">
+          <span class="settings-nav-icon">🗃️</span> Data
+        </div>
+      </nav>
+
+      <!-- Settings Content -->
+      <div>
+
+        <!-- Profile Section -->
+        <div class="settings-section active" id="section-profile">
+          <div class="section-card">
+            <div class="section-card-header"><h3>👤 Admin Profile</h3></div>
+            <div class="section-card-body">
+              <div class="profile-header">
+                <div class="profile-avatar-big" id="prof-avatar">A</div>
+                <div class="profile-meta">
+                  <div class="p-name" id="prof-name">Admin User</div>
+                  <div class="p-email" id="prof-email">admin@organictrade.com</div>
+                  <div class="p-role">👑 Administrator</div>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Full Name</label>
+                  <input type="text" class="form-control" id="s-name" placeholder="Your full name"/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Email</label>
+                  <input type="email" class="form-control" id="s-email" placeholder="admin@organictrade.com"/>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Display Avatar Initial</label>
+                <input type="text" class="form-control" id="s-avatar" maxlength="2" placeholder="A" style="max-width:80px;text-align:center;font-size:1.2rem;font-weight:700;"/>
+                <div class="form-hint">One or two characters shown in your avatar</div>
+              </div>
+              <button class="save-btn" onclick="saveProfile()">💾 Save Profile</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Store Section -->
+        <div class="settings-section" id="section-store">
+          <div class="section-card">
+            <div class="section-card-header"><h3>🏪 Store Configuration</h3></div>
+            <div class="section-card-body">
+              <div class="info-box">
+                <span class="info-box-icon">ℹ️</span>
+                <span class="info-box-text">These are the current store settings. Changes take effect immediately across the platform.</span>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Store Name</label>
+                  <input type="text" class="form-control" value="OrganicTrade" id="store-name"/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Currency</label>
+                  <select class="form-control">
+                    <option selected>USD ($)</option>
+                    <option>EUR (€)</option>
+                    <option>GBP (£)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Store Tagline</label>
+                <input type="text" class="form-control" value="Pure. Organic. Global." id="store-tagline"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Contact Email</label>
+                <input type="email" class="form-control" value="hello@organictrade.com" id="store-email"/>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Min. Order Value ($)</label>
+                  <input type="number" class="form-control" value="25" min="0"/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Free Shipping Threshold ($)</label>
+                  <input type="number" class="form-control" value="100" min="0"/>
+                </div>
+              </div>
+
+              <div style="margin:18px 0 10px;font-size:.78rem;font-weight:600;color:#c9a84c;text-transform:uppercase;letter-spacing:.08em;">Live Store Stats</div>
+              <div id="live-stats"></div>
+
+              <div style="margin-top:16px;">
+                <button class="save-btn" onclick="saveStoreSettings()">💾 Save Store Settings</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notifications Section -->
+        <div class="settings-section" id="section-notifications">
+          <div class="section-card">
+            <div class="section-card-header"><h3>🔔 Notification Preferences</h3></div>
+            <div class="section-card-body">
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">📦 New Order Alerts</div>
+                  <div class="toggle-desc">Get notified when new orders are placed</div>
+                </div>
+                <button class="toggle-switch toggle-on" id="notif-orders" onclick="toggleNotif(this)"></button>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">🏪 New Vendor Registration</div>
+                  <div class="toggle-desc">Alert when a new vendor registers for approval</div>
+                </div>
+                <button class="toggle-switch toggle-on" id="notif-vendors" onclick="toggleNotif(this)"></button>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">👥 New User Registration</div>
+                  <div class="toggle-desc">Notify when a new customer registers</div>
+                </div>
+                <button class="toggle-switch toggle-off" id="notif-users" onclick="toggleNotif(this)"></button>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">⚠️ Low Stock Alerts</div>
+                  <div class="toggle-desc">Alert when product stock falls below 50 units</div>
+                </div>
+                <button class="toggle-switch toggle-on" id="notif-stock" onclick="toggleNotif(this)"></button>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">📊 Weekly Revenue Report</div>
+                  <div class="toggle-desc">Receive weekly revenue summary emails</div>
+                </div>
+                <button class="toggle-switch toggle-on" id="notif-report" onclick="toggleNotif(this)"></button>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">🔔 Browser Push Notifications</div>
+                  <div class="toggle-desc">Show desktop notifications in browser</div>
+                </div>
+                <button class="toggle-switch toggle-off" id="notif-push" onclick="toggleNotif(this)"></button>
+              </div>
+              <div style="margin-top:16px;">
+                <button class="save-btn" onclick="showToast('Notification preferences saved ✓','success')">💾 Save Preferences</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Security Section -->
+        <div class="settings-section" id="section-security">
+          <div class="section-card">
+            <div class="section-card-header"><h3>🔒 Change Password</h3></div>
+            <div class="section-card-body">
+              <div class="form-group">
+                <label class="form-label">Current Password</label>
+                <input type="password" class="form-control" id="s-curr-pwd" placeholder="Enter current password"/>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">New Password</label>
+                  <input type="password" class="form-control" id="s-new-pwd" placeholder="New password"/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Confirm New Password</label>
+                  <input type="password" class="form-control" id="s-confirm-pwd" placeholder="Confirm password"/>
+                </div>
+              </div>
+              <div class="form-hint" style="margin-bottom:14px;">Password must be at least 8 characters, include uppercase, lowercase, and a number.</div>
+              <button class="save-btn" onclick="changePassword()">🔐 Update Password</button>
+            </div>
+          </div>
+          <div class="section-card">
+            <div class="section-card-header"><h3>🛡️ Security Settings</h3></div>
+            <div class="section-card-body">
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">🔐 Two-Factor Authentication</div>
+                  <div class="toggle-desc">Require 2FA for admin logins</div>
+                </div>
+                <button class="toggle-switch toggle-off" onclick="toggleNotif(this)"></button>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">⏰ Auto Session Timeout</div>
+                  <div class="toggle-desc">Automatically log out after 2 hours of inactivity</div>
+                </div>
+                <button class="toggle-switch toggle-on" onclick="toggleNotif(this)"></button>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">📱 Login Activity Notifications</div>
+                  <div class="toggle-desc">Email alerts on new login attempts</div>
+                </div>
+                <button class="toggle-switch toggle-on" onclick="toggleNotif(this)"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Section -->
+        <div class="settings-section" id="section-data">
+          <div class="section-card">
+            <div class="section-card-header"><h3>🗃️ Data Management</h3></div>
+            <div class="section-card-body">
+              <div class="info-box">
+                <span class="info-box-icon">💾</span>
+                <span class="info-box-text">All data is stored in localStorage. Export a JSON backup of all store data, or reset to seed data for testing.</span>
+              </div>
+
+              <div style="margin-bottom:16px;">
+                <div class="setting-row">
+                  <div><div class="setting-label">Export Store Data</div><div class="setting-sub">Download all products, orders, and users as JSON</div></div>
+                  <button class="save-btn" onclick="exportData()">⬇️ Export JSON</button>
+                </div>
+                <div class="setting-row">
+                  <div><div class="setting-label">Store Statistics</div><div class="setting-sub">Current data overview</div></div>
+                  <span class="setting-value" id="data-overview">Loading...</span>
+                </div>
+                <div class="setting-row">
+                  <div><div class="setting-label">localStorage Size</div><div class="setting-sub">Approximate data stored</div></div>
+                  <span class="setting-value" id="storage-size">Calculating...</span>
+                </div>
+              </div>
+
+              <div class="danger-zone">
+                <h4>⚠️ Danger Zone</h4>
+                <p>Reset all store data to initial seed state. This will delete all custom orders, users, and products you've added.</p>
+                <button class="danger-btn" onclick="confirmReset()">🔄 Reset to Seed Data</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="../js/store.js"></script>
+<script>
+  function showToast(msg,type='info'){
+    const c=document.getElementById('toast-container');
+    const icons={success:'✅',error:'❌',warning:'⚠️',info:'🌿'};
+    const t=document.createElement('div');
+    t.className=`toast toast-${type}`;
+    t.innerHTML=`<span class="toast-icon">${icons[type]||'🌿'}</span><span class="toast-msg">${msg}</span>`;
+    c.appendChild(t);
+    setTimeout(()=>{t.classList.add('hide');setTimeout(()=>t.remove(),300);},3000);
+  }
+
+  const adminUser=Store.requireAuth(['admin'],'../auth.html');
+  if(!adminUser) throw new Error();
+  document.getElementById('sidebar-avatar').textContent=adminUser.avatar||adminUser.name.charAt(0);
+  document.getElementById('sidebar-name').textContent=adminUser.name;
+  document.getElementById('topbar-avatar').textContent=adminUser.avatar||adminUser.name.charAt(0);
+  document.getElementById('topbar-name').textContent=adminUser.name;
+
+  // Load profile
+  document.getElementById('prof-avatar').textContent=adminUser.avatar||adminUser.name.charAt(0);
+  document.getElementById('prof-name').textContent=adminUser.name;
+  document.getElementById('prof-email').textContent=adminUser.email;
+  document.getElementById('s-name').value=adminUser.name;
+  document.getElementById('s-email').value=adminUser.email;
+  document.getElementById('s-avatar').value=adminUser.avatar||adminUser.name.charAt(0);
+
+  function doLogout(){Store.logout();showToast('Logged out','success');setTimeout(()=>window.location.href='../auth.html',800);}
+  function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('open');}
+
+  function showSection(id,el){
+    document.querySelectorAll('.settings-section').forEach(s=>s.classList.remove('active'));
+    document.querySelectorAll('.settings-nav-item').forEach(n=>n.classList.remove('active'));
+    document.getElementById('section-'+id).classList.add('active');
+    el.classList.add('active');
+    if(id==='data') loadDataInfo();
+    if(id==='store') loadLiveStats();
+  }
+
+  function toggleNotif(btn){
+    const isOn=btn.classList.contains('toggle-on');
+    btn.classList.toggle('toggle-on',!isOn);
+    btn.classList.toggle('toggle-off',isOn);
+  }
+
+  function saveProfile(){
+    const name=document.getElementById('s-name').value.trim();
+    const email=document.getElementById('s-email').value.trim();
+    const avatar=document.getElementById('s-avatar').value.trim().toUpperCase();
+    if(!name||!email){showToast('Name and email are required','error');return;}
+    Store.updateUser(adminUser.id,{name,email,avatar});
+    Store.setCurrentUser({...adminUser,name,email,avatar});
+    document.getElementById('prof-name').textContent=name;
+    document.getElementById('prof-email').textContent=email;
+    document.getElementById('prof-avatar').textContent=avatar||name.charAt(0);
+    document.getElementById('sidebar-avatar').textContent=avatar||name.charAt(0);
+    document.getElementById('sidebar-name').textContent=name;
+    document.getElementById('topbar-avatar').textContent=avatar||name.charAt(0);
+    document.getElementById('topbar-name').textContent=name;
+    showToast('Profile updated successfully ✓','success');
+  }
+
+  function saveStoreSettings(){
+    showToast('Store settings saved ✓','success');
+  }
+
+  function changePassword(){
+    const curr=document.getElementById('s-curr-pwd').value;
+    const newP=document.getElementById('s-new-pwd').value;
+    const conf=document.getElementById('s-confirm-pwd').value;
+    if(!curr||!newP||!conf){showToast('All fields are required','error');return;}
+    if(curr!==adminUser.password){showToast('Current password is incorrect','error');return;}
+    if(newP!==conf){showToast('New passwords do not match','error');return;}
+    if(newP.length<8){showToast('Password must be at least 8 characters','error');return;}
+    Store.updateUser(adminUser.id,{password:newP});
+    Store.setCurrentUser({...adminUser,password:newP});
+    document.getElementById('s-curr-pwd').value='';
+    document.getElementById('s-new-pwd').value='';
+    document.getElementById('s-confirm-pwd').value='';
+    showToast('Password updated successfully 🔐','success');
+  }
+
+  function loadLiveStats(){
+    const stats=Store.getStats();
+    document.getElementById('live-stats').innerHTML=`
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(201,168,76,0.08);border-radius:8px;padding:10px 12px;text-align:center;">
+          <div style="font-size:1.1rem;font-weight:700;color:#f0ebe0;">${stats.totalOrders}</div>
+          <div style="font-size:.65rem;color:#7a9080;text-transform:uppercase;">Orders</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(201,168,76,0.08);border-radius:8px;padding:10px 12px;text-align:center;">
+          <div style="font-size:1.1rem;font-weight:700;color:#c9a84c;">${Store.formatPrice(stats.totalRevenue)}</div>
+          <div style="font-size:.65rem;color:#7a9080;text-transform:uppercase;">Revenue</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(201,168,76,0.08);border-radius:8px;padding:10px 12px;text-align:center;">
+          <div style="font-size:1.1rem;font-weight:700;color:#f0ebe0;">${stats.activeProducts}</div>
+          <div style="font-size:.65rem;color:#7a9080;text-transform:uppercase;">Products</div>
+        </div>
+      </div>`;
+  }
+
+  function loadDataInfo(){
+    const stats=Store.getStats();
+    document.getElementById('data-overview').textContent=`${stats.totalOrders} orders, ${Store.getProducts().length} products, ${Store.getUsers().length} users`;
+    try{
+      let size=0;
+      for(let k in localStorage){if(k.startsWith('ot_'))size+=localStorage[k].length;}
+      document.getElementById('storage-size').textContent=`~${(size/1024).toFixed(1)} KB`;
+    }catch(e){document.getElementById('storage-size').textContent='N/A';}
+  }
+
+  function exportData(){
+    const data={
+      exportedAt:new Date().toISOString(),
+      users:Store.getUsers(),
+      products:Store.getProducts(),
+      orders:Store.getOrders(),
+      stats:Store.getStats()
+    };
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=`organictrade-data-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Data exported successfully ⬇️','success');
+  }
+
+  function confirmReset(){
+    if(confirm('Reset ALL store data to seed state? This will delete all custom data and cannot be undone!')){
+      localStorage.removeItem('ot_initialized');
+      localStorage.removeItem('ot_users');
+      localStorage.removeItem('ot_products');
+      localStorage.removeItem('ot_orders');
+      localStorage.removeItem('ot_cart');
+      localStorage.removeItem('ot_wishlist');
+      Store.init();
+      showToast('Store reset to seed data ✓','success');
+      setTimeout(()=>window.location.reload(),1200);
+    }
+  }
+</script>
+</body>
+</html>

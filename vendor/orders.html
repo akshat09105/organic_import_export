@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Orders — OrganicTrade</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/main.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a1a0d;
+      --bg2: #0f2212;
+      --bg3: #162b1a;
+      --gold: #c9a84c;
+      --gold2: #e8c96a;
+      --text: #f0ebe0;
+      --text2: #b8b0a0;
+      --green: #2d6a4f;
+      --green2: #40916c;
+      --sidebar-w: 260px;
+      --radius: 14px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: linear-gradient(180deg, #061009 0%, #0a1a0d 40%, #061009 100%);
+      border-right: 1px solid rgba(201,168,76,0.15);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      z-index: 100;
+    }
+
+    .sidebar-logo { padding: 28px 24px 20px; border-bottom: 1px solid rgba(201,168,76,0.12); }
+    .sidebar-logo .logo-mark { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--gold); }
+    .sidebar-logo .logo-sub { font-size: 0.7rem; color: var(--text2); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+    .sidebar-badge { display: inline-block; background: rgba(201,168,76,0.15); color: var(--gold); font-size: 0.65rem; font-weight: 600; padding: 2px 8px; border-radius: 20px; border: 1px solid rgba(201,168,76,0.25); margin-top: 6px; letter-spacing: 1px; text-transform: uppercase; }
+
+    .sidebar-nav { flex: 1; padding: 16px 12px; }
+    .nav-label { font-size: 0.65rem; color: var(--text2); letter-spacing: 2px; text-transform: uppercase; padding: 8px 12px 4px; margin-top: 8px; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 10px; cursor: pointer; text-decoration: none; color: var(--text2); font-size: 0.875rem; font-weight: 500; transition: all 0.2s ease; margin-bottom: 2px; }
+    .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+    .nav-item.active { background: linear-gradient(135deg, rgba(201,168,76,0.18), rgba(201,168,76,0.06)); color: var(--gold); border: 1px solid rgba(201,168,76,0.2); }
+    .nav-item .icon { font-size: 1.1rem; width: 22px; text-align: center; flex-shrink: 0; }
+
+    .sidebar-profile { padding: 16px; border-top: 1px solid rgba(201,168,76,0.12); }
+    .profile-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(201,168,76,0.12); border-radius: 12px; padding: 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .profile-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), #a07830); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1rem; color: var(--bg); flex-shrink: 0; }
+    .profile-info .name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+    .profile-info .role { font-size: 0.7rem; color: var(--gold); }
+    .btn-logout { width: 100%; padding: 9px; background: rgba(201,168,76,0.08); border: 1px solid rgba(201,168,76,0.2); border-radius: 8px; color: var(--text2); font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn-logout:hover { background: rgba(220,60,60,0.15); border-color: rgba(220,60,60,0.3); color: #f87171; }
+
+    /* ── MAIN ── */
+    .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+
+    .topbar {
+      background: rgba(10,26,13,0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(201,168,76,0.1);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .topbar-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 600; }
+    .page-content { padding: 32px; flex: 1; }
+
+    /* ── REVENUE SUMMARY ── */
+    .revenue-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .rev-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: var(--radius);
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+
+    .rev-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--card-accent, var(--gold)), transparent);
+    }
+
+    .rev-card:hover { transform: translateY(-2px); border-color: rgba(201,168,76,0.15); }
+
+    .rev-icon { font-size: 1.6rem; margin-bottom: 10px; }
+    .rev-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+      line-height: 1;
+    }
+    .rev-label { font-size: 0.78rem; color: var(--text2); }
+    .rev-card.gold  { --card-accent: var(--gold); }
+    .rev-card.green { --card-accent: #40916c; }
+    .rev-card.blue  { --card-accent: #60a5fa; }
+
+    /* ── STATUS TABS ── */
+    .status-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      padding: 8px 18px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.03);
+      color: var(--text2);
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.07); }
+
+    .tab-btn.active {
+      background: rgba(201,168,76,0.12);
+      border-color: rgba(201,168,76,0.3);
+      color: var(--gold);
+    }
+
+    .tab-count {
+      background: rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 0 6px;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+
+    .tab-btn.active .tab-count {
+      background: rgba(201,168,76,0.25);
+      color: var(--gold);
+    }
+
+    /* ── TABLE ── */
+    .orders-table-wrap {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      padding: 14px 16px;
+      text-align: left;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text2);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      background: rgba(255,255,255,0.02);
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(201,168,76,0.04); }
+
+    tbody td {
+      padding: 14px 16px;
+      font-size: 0.85rem;
+      vertical-align: middle;
+    }
+
+    .order-id-cell { font-family: monospace; font-weight: 700; color: var(--gold); font-size: 0.82rem; }
+    .customer-cell { font-weight: 500; color: var(--text); }
+    .date-cell { color: var(--text2); font-size: 0.78rem; white-space: nowrap; }
+    .items-cell { color: var(--text2); font-size: 0.8rem; max-width: 180px; }
+    .revenue-cell { font-weight: 700; color: var(--text); }
+
+    /* ── BADGE ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    .badge-processing { background: rgba(245,158,11,0.12); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); }
+    .badge-shipped    { background: rgba(96,165,250,0.12);  color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
+    .badge-delivered  { background: rgba(52,211,153,0.12);  color: #34d399; border: 1px solid rgba(52,211,153,0.2); }
+    .badge-cancelled  { background: rgba(248,113,113,0.12); color: #f87171; border: 1px solid rgba(248,113,113,0.2); }
+
+    .action-view {
+      padding: 6px 12px;
+      border-radius: 7px;
+      background: rgba(201,168,76,0.08);
+      border: 1px solid rgba(201,168,76,0.18);
+      color: var(--gold);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .action-view:hover { background: rgba(201,168,76,0.18); }
+
+    /* ── EMPTY ── */
+    .empty-state {
+      text-align: center;
+      padding: 60px 40px;
+    }
+
+    .empty-state .ei { font-size: 3.5rem; margin-bottom: 16px; opacity: 0.4; }
+    .empty-state h3 { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--text); margin-bottom: 8px; }
+    .empty-state p { color: var(--text2); font-size: 0.875rem; }
+
+    /* ── ORDER DETAIL MODAL ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(6px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .modal-overlay.show { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: var(--bg2);
+      border: 1px solid rgba(201,168,76,0.2);
+      border-radius: 18px;
+      width: 100%;
+      max-width: 620px;
+      max-height: 85vh;
+      overflow-y: auto;
+      transform: scale(0.9) translateY(20px);
+      transition: transform 0.3s;
+    }
+
+    .modal-overlay.show .modal { transform: scale(1) translateY(0); }
+
+    .modal-header {
+      padding: 24px 28px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: var(--bg2);
+      z-index: 1;
+    }
+
+    .modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .modal-close {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text2);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      transition: all 0.2s;
+    }
+
+    .modal-close:hover { background: rgba(248,113,113,0.15); color: #f87171; border-color: rgba(248,113,113,0.3); }
+
+    .modal-body { padding: 28px; }
+
+    .modal-section { margin-bottom: 24px; }
+    .modal-section-title {
+      font-size: 0.75rem;
+      color: var(--text2);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .info-item { }
+    .info-key { font-size: 0.72rem; color: var(--text2); margin-bottom: 3px; }
+    .info-val { font-size: 0.875rem; color: var(--text); font-weight: 500; }
+
+    /* Items list */
+    .order-item-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+
+    .order-item-row:last-child { margin-bottom: 0; }
+
+    .item-img {
+      width: 48px; height: 48px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 1px solid rgba(201,168,76,0.1);
+    }
+
+    .item-img-ph {
+      width: 48px; height: 48px;
+      border-radius: 8px;
+      background: rgba(201,168,76,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+
+    .item-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+    .item-qty  { font-size: 0.75rem; color: var(--text2); }
+    .item-total { font-size: 0.9rem; font-weight: 700; color: var(--gold); margin-left: auto; white-space: nowrap; }
+
+    .vendor-item { border-color: rgba(201,168,76,0.18); background: rgba(201,168,76,0.04); }
+
+    /* Timeline */
+    .timeline { display: flex; flex-direction: column; gap: 0; }
+
+    .tl-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding-bottom: 16px;
+      position: relative;
+    }
+
+    .tl-item:last-child { padding-bottom: 0; }
+
+    .tl-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--dot-color, var(--text2));
+      flex-shrink: 0;
+      margin-top: 4px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .tl-item:not(:last-child)::before {
+      content: '';
+      position: absolute;
+      left: 5px;
+      top: 16px;
+      bottom: 0;
+      width: 2px;
+      background: rgba(255,255,255,0.07);
+    }
+
+    .tl-status { font-size: 0.82rem; font-weight: 600; color: var(--text); text-transform: capitalize; }
+    .tl-date   { font-size: 0.73rem; color: var(--text2); }
+
+    /* Order total summary */
+    .order-total-table { width: 100%; }
+    .order-total-table tr td { padding: 5px 0; font-size: 0.85rem; }
+    .order-total-table .lbl { color: var(--text2); }
+    .order-total-table .val { text-align: right; font-weight: 500; color: var(--text); }
+    .order-total-table .grand-lbl { font-weight: 700; color: var(--text); }
+    .order-total-table .grand-val { text-align: right; font-weight: 700; color: var(--gold); font-size: 1rem; }
+
+    .divider { border: none; border-top: 1px solid rgba(255,255,255,0.07); margin: 10px 0; }
+
+    /* ── TOAST ── */
+    #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+    .toast { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: 10px; background: var(--bg3); border: 1px solid rgba(201,168,76,0.25); box-shadow: 0 8px 32px rgba(0,0,0,0.4); animation: slideIn 0.3s ease; min-width: 260px; max-width: 360px; }
+    .toast.hide { animation: slideOut 0.3s ease forwards; }
+    .toast-success { border-color: rgba(52,211,153,0.3); }
+    .toast-error   { border-color: rgba(248,113,113,0.3); }
+    .toast-warning { border-color: rgba(245,158,11,0.3); }
+    .toast-icon { font-size: 1.1rem; flex-shrink: 0; }
+    .toast-msg  { font-size: 0.85rem; color: var(--text); }
+
+    @keyframes slideIn { from { opacity:0; transform: translateX(20px); } to { opacity:1; transform: translateX(0); } }
+    @keyframes slideOut { from { opacity:1; transform: translateX(0); } to { opacity:0; transform: translateX(20px); } }
+
+    @media (max-width: 900px) {
+      .revenue-row { grid-template-columns: 1fr; }
+      .info-grid { grid-template-columns: 1fr; }
+      table { font-size: 0.78rem; }
+      thead th, tbody td { padding: 10px 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">🌿 OrganicTrade</div>
+    <div class="logo-sub">Import &amp; Export</div>
+    <span class="sidebar-badge">Product Manager</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-label">Main Menu</div>
+    <a href="index.html" class="nav-item"><span class="icon">📊</span> Dashboard</a>
+    <a href="my-products.html" class="nav-item"><span class="icon">🌿</span> My Products</a>
+    <a href="add-product.html" class="nav-item"><span class="icon">➕</span> Add Product</a>
+    <a href="orders.html" class="nav-item active"><span class="icon">📦</span> My Orders</a>
+    <div class="nav-label" style="margin-top:16px;">Account</div>
+    <a href="profile.html" class="nav-item"><span class="icon">👤</span> Profile</a>
+  </nav>
+
+  <div class="sidebar-profile">
+    <div class="profile-card">
+      <div class="profile-avatar" id="sidebarAvatar">P</div>
+      <div class="profile-info">
+        <div class="name" id="sidebarName">Loading…</div>
+        <div class="role">Product Manager</div>
+      </div>
+    </div>
+    <button class="btn-logout" id="logoutBtn"><span>🚪</span> Sign Out</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title">📦 Orders for My Products</div>
+  </div>
+
+  <div class="page-content">
+
+    <!-- REVENUE SUMMARY CARDS -->
+    <div class="revenue-row">
+      <div class="rev-card gold">
+        <div class="rev-icon">💰</div>
+        <div class="rev-value" id="revThisMonth">$0.00</div>
+        <div class="rev-label">This Month's Revenue</div>
+      </div>
+      <div class="rev-card green">
+        <div class="rev-icon">📈</div>
+        <div class="rev-value" id="revTotal">$0.00</div>
+        <div class="rev-label">Total Revenue</div>
+      </div>
+      <div class="rev-card blue">
+        <div class="rev-icon">📦</div>
+        <div class="rev-value" id="totalOrders">0</div>
+        <div class="rev-label">Total Orders</div>
+      </div>
+    </div>
+
+    <!-- STATUS TABS -->
+    <div class="status-tabs" id="statusTabs">
+      <button class="tab-btn active" data-status="all">🗂️ All <span class="tab-count" id="cnt-all">0</span></button>
+      <button class="tab-btn" data-status="processing">⏳ Processing <span class="tab-count" id="cnt-processing">0</span></button>
+      <button class="tab-btn" data-status="shipped">🚚 Shipped <span class="tab-count" id="cnt-shipped">0</span></button>
+      <button class="tab-btn" data-status="delivered">✅ Delivered <span class="tab-count" id="cnt-delivered">0</span></button>
+      <button class="tab-btn" data-status="cancelled">❌ Cancelled <span class="tab-count" id="cnt-cancelled">0</span></button>
+    </div>
+
+    <!-- ORDERS TABLE -->
+    <div class="orders-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Date</th>
+            <th>My Products</th>
+            <th>My Revenue</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="ordersTableBody">
+          <tr>
+            <td colspan="7">
+              <div class="empty-state">
+                <div class="ei">📦</div>
+                <h3>Loading orders…</h3>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</main>
+
+<!-- ORDER DETAIL MODAL -->
+<div class="modal-overlay" id="orderModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Order Details</div>
+      <button class="modal-close" id="closeModal">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody">
+      <!-- Filled dynamically -->
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="../js/store.js"></script>
+<script>
+  // ── Toast ──────────────────────────────────────────────
+  function showToast(msg, type = 'info') {
+    const c = document.getElementById('toast-container');
+    const icons = { success:'✅', error:'❌', warning:'⚠️', info:'🌿' };
+    const t = document.createElement('div');
+    t.className = `toast toast-${type}`;
+    t.innerHTML = `<span class="toast-icon">${icons[type]||'🌿'}</span><span class="toast-msg">${msg}</span>`;
+    c.appendChild(t);
+    setTimeout(() => { t.classList.add('hide'); setTimeout(() => t.remove(), 300); }, 3000);
+  }
+
+  // ── Auth ──────────────────────────────────────────────
+  const user = Store.requireAuth(['vendor'], '../auth.html');
+  if (!user) throw new Error('Not authorized');
+
+  document.getElementById('sidebarName').textContent = user.name;
+  document.getElementById('sidebarAvatar').textContent = user.avatar || user.name.charAt(0);
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    Store.logout();
+    window.location.href = '../auth.html';
+  });
+
+  // ── State ─────────────────────────────────────────────
+  let myOrders      = [];
+  let myProductIds  = new Set();
+  let activeStatus  = 'all';
+
+  const statusConfig = {
+    processing: { cls: 'badge-processing', icon: '⏳' },
+    shipped:    { cls: 'badge-shipped',    icon: '🚚' },
+    delivered:  { cls: 'badge-delivered',  icon: '✅' },
+    cancelled:  { cls: 'badge-cancelled',  icon: '❌' },
+  };
+
+  // ── Load Data ─────────────────────────────────────────
+  function load() {
+    const myProducts = Store.getProducts({ vendorId: user.id });
+    myProductIds = new Set(myProducts.map(p => p.id));
+
+    const allOrders = Store.getOrders();
+    myOrders = allOrders.filter(o =>
+      o.items && o.items.some(i => myProductIds.has(i.productId))
+    );
+
+    // Revenue calcs
+    const now = new Date();
+    let totalRev = 0, monthRev = 0;
+    myOrders.forEach(o => {
+      o.items.forEach(i => {
+        if (myProductIds.has(i.productId)) {
+          const amt = i.price * i.qty;
+          totalRev += amt;
+          const d = new Date(o.createdAt);
+          if (d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) {
+            monthRev += amt;
+          }
+        }
+      });
+    });
+
+    document.getElementById('revThisMonth').textContent = Store.formatPrice(monthRev);
+    document.getElementById('revTotal').textContent      = Store.formatPrice(totalRev);
+    document.getElementById('totalOrders').textContent   = myOrders.length;
+
+    // Tab counts
+    const statuses = ['processing','shipped','delivered','cancelled'];
+    document.getElementById('cnt-all').textContent = myOrders.length;
+    statuses.forEach(s => {
+      document.getElementById(`cnt-${s}`).textContent =
+        myOrders.filter(o => o.status === s).length;
+    });
+
+    renderTable();
+  }
+
+  function vendorRevenue(order) {
+    return order.items.reduce((s, i) => {
+      if (myProductIds.has(i.productId)) s += i.price * i.qty;
+      return s;
+    }, 0);
+  }
+
+  function renderTable() {
+    const filtered = activeStatus === 'all'
+      ? myOrders
+      : myOrders.filter(o => o.status === activeStatus);
+
+    const tbody = document.getElementById('ordersTableBody');
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7">
+            <div class="empty-state">
+              <div class="ei">📦</div>
+              <h3>No ${activeStatus === 'all' ? '' : activeStatus + ' '}orders found</h3>
+              <p>Orders containing your products will appear here.</p>
+            </div>
+          </td>
+        </tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(o => {
+      const myItems    = o.items.filter(i => myProductIds.has(i.productId));
+      const myRev      = vendorRevenue(o);
+      const customer   = Store.getUserById(o.userId);
+      const custName   = customer ? customer.name : `User #${o.userId.slice(-4)}`;
+      const sc         = statusConfig[o.status] || { cls:'', icon:'•' };
+      const itemSummary = myItems.length > 0
+        ? myItems.map(i => i.name).join(', ')
+        : 'Items';
+
+      return `
+        <tr class="order-row" data-id="${o.id}">
+          <td class="order-id-cell">#${o.id.slice(-8).toUpperCase()}</td>
+          <td class="customer-cell">👤 ${custName}</td>
+          <td class="date-cell">${Store.formatDate(o.createdAt)}</td>
+          <td class="items-cell" title="${itemSummary}">
+            <span style="font-size:0.75rem;">
+              ${myItems.length} item${myItems.length!==1?'s':''} — ${itemSummary.length > 40 ? itemSummary.slice(0,40)+'…' : itemSummary}
+            </span>
+          </td>
+          <td class="revenue-cell">${Store.formatPrice(myRev)}</td>
+          <td><span class="badge ${sc.cls}">${sc.icon} ${o.status}</span></td>
+          <td>
+            <button class="action-view" data-id="${o.id}">👁️ View</button>
+          </td>
+        </tr>`;
+    }).join('');
+
+    // Attach view buttons
+    tbody.querySelectorAll('.action-view').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openOrderModal(btn.dataset.id);
+      });
+    });
+
+    // Row click
+    tbody.querySelectorAll('.order-row').forEach(row => {
+      row.addEventListener('click', () => openOrderModal(row.dataset.id));
+    });
+  }
+
+  // ── Status Tabs ───────────────────────────────────────
+  document.getElementById('statusTabs').addEventListener('click', function(e) {
+    const btn = e.target.closest('.tab-btn');
+    if (!btn) return;
+    this.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeStatus = btn.dataset.status;
+    renderTable();
+  });
+
+  // ── Order Detail Modal ────────────────────────────────
+  function openOrderModal(orderId) {
+    const order = Store.getOrderById(orderId);
+    if (!order) return;
+
+    const customer   = Store.getUserById(order.userId);
+    const custName   = customer ? customer.name : 'Unknown Customer';
+    const custEmail  = customer ? customer.email : '—';
+    const addr       = order.shippingAddress || {};
+    const myItems    = order.items.filter(i => myProductIds.has(i.productId));
+    const otherItems = order.items.filter(i => !myProductIds.has(i.productId));
+    const myRev      = vendorRevenue(order);
+    const sc         = statusConfig[order.status] || { cls:'', icon:'•' };
+
+    const timelineColors = {
+      placed:     '#c9a84c',
+      processing: '#f59e0b',
+      shipped:    '#60a5fa',
+      delivered:  '#34d399',
+      cancelled:  '#f87171',
+    };
+
+    document.getElementById('modalTitle').innerHTML =
+      `📦 Order <span style="color:var(--gold);font-family:monospace;">#${order.id.slice(-8).toUpperCase()}</span>`;
+
+    document.getElementById('modalBody').innerHTML = `
+      <!-- Status -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding:14px 18px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;">
+        <div>
+          <div style="font-size:0.72rem;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Order Status</div>
+          <span class="badge ${sc.cls}" style="font-size:0.85rem;padding:6px 14px;">${sc.icon} ${order.status}</span>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:0.72rem;color:var(--text2);margin-bottom:4px;">Your Revenue</div>
+          <div style="font-size:1.3rem;font-weight:700;color:var(--gold);">${Store.formatPrice(myRev)}</div>
+        </div>
+      </div>
+
+      <!-- Customer Info -->
+      <div class="modal-section">
+        <div class="modal-section-title">👤 Customer Information</div>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-key">Name</div>
+            <div class="info-val">${custName}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-key">Email</div>
+            <div class="info-val">${custEmail}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-key">Payment Method</div>
+            <div class="info-val">${order.paymentMethod || '—'}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-key">Order Date</div>
+            <div class="info-val">${Store.formatDate(order.createdAt)}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shipping Address -->
+      <div class="modal-section">
+        <div class="modal-section-title">📍 Shipping Address</div>
+        <div style="font-size:0.875rem;color:var(--text);line-height:1.8;background:rgba(255,255,255,0.03);padding:14px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);">
+          ${addr.street ? addr.street + '<br>' : ''}
+          ${addr.city ? addr.city + ', ' : ''}${addr.state ? addr.state + ' ' : ''}${addr.zip || ''}<br>
+          ${addr.country || '—'}
+        </div>
+      </div>
+
+      <!-- MY Items -->
+      <div class="modal-section">
+        <div class="modal-section-title">🌿 Your Products in This Order</div>
+        ${myItems.map(i => `
+          <div class="order-item-row vendor-item">
+            ${i.image
+              ? `<img src="${i.image}" class="item-img" alt="${i.name}" onerror="this.style.display='none'" />`
+              : `<div class="item-img-ph">🌿</div>`
+            }
+            <div style="flex:1;">
+              <div class="item-name">${i.name}</div>
+              <div class="item-qty">Qty: ${i.qty} × ${Store.formatPrice(i.price)}</div>
+            </div>
+            <div class="item-total">${Store.formatPrice(i.price * i.qty)}</div>
+          </div>
+        `).join('')}
+      </div>
+
+      ${otherItems.length > 0 ? `
+        <!-- Other Items -->
+        <div class="modal-section">
+          <div class="modal-section-title">📦 Other Items in Order</div>
+          ${otherItems.map(i => `
+            <div class="order-item-row" style="opacity:0.6;">
+              ${i.image
+                ? `<img src="${i.image}" class="item-img" alt="${i.name}" onerror="this.style.display='none'" />`
+                : `<div class="item-img-ph">📦</div>`
+              }
+              <div style="flex:1;">
+                <div class="item-name">${i.name}</div>
+                <div class="item-qty">Qty: ${i.qty} × ${Store.formatPrice(i.price)}</div>
+              </div>
+              <div class="item-total" style="color:var(--text2);">${Store.formatPrice(i.price * i.qty)}</div>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+
+      <!-- Order Total -->
+      <div class="modal-section">
+        <div class="modal-section-title">💰 Order Summary</div>
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:16px 18px;">
+          <table class="order-total-table">
+            <tr>
+              <td class="lbl">Subtotal</td>
+              <td class="val">${Store.formatPrice(order.subtotal)}</td>
+            </tr>
+            <tr>
+              <td class="lbl">Shipping</td>
+              <td class="val">${Store.formatPrice(order.shipping)}</td>
+            </tr>
+            <tr>
+              <td class="lbl">Tax</td>
+              <td class="val">${Store.formatPrice(order.tax)}</td>
+            </tr>
+            <tr><td colspan="2"><hr class="divider" /></td></tr>
+            <tr>
+              <td class="grand-lbl">Order Total</td>
+              <td class="grand-val">${Store.formatPrice(order.total)}</td>
+            </tr>
+            <tr>
+              <td class="lbl" style="padding-top:8px;">Your Revenue</td>
+              <td class="val" style="padding-top:8px;color:var(--gold);font-weight:700;">${Store.formatPrice(myRev)}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- Timeline -->
+      <div class="modal-section" style="margin-bottom:0">
+        <div class="modal-section-title">🕐 Order Timeline</div>
+        <div class="timeline">
+          ${(order.timeline || []).map(t => `
+            <div class="tl-item">
+              <div class="tl-dot" style="background:${timelineColors[t.status] || '#b8b0a0'}"></div>
+              <div>
+                <div class="tl-status">${t.status}</div>
+                <div class="tl-date">${Store.formatDate(t.date)} — ${new Date(t.date).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+
+    document.getElementById('orderModal').classList.add('show');
+  }
+
+  document.getElementById('closeModal').addEventListener('click', () => {
+    document.getElementById('orderModal').classList.remove('show');
+  });
+
+  document.getElementById('orderModal').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('show');
+  });
+
+  // ── Init ──────────────────────────────────────────────
+  load();
+</script>
+</body>
+</html>

@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Orders — OrganicTrade</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a1a0d; --gold: #c9a84c; --gold-light: #e2c07a;
+      --text: #f0ebe0; --text-muted: #a89f8c;
+      --green-dark: #0d2211; --green-mid: #153320;
+      --card-bg: rgba(255,255,255,0.04); --border: rgba(201,168,76,0.2);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      padding: 14px 60px; background: rgba(10,26,13,0.95); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border); box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: var(--gold); text-decoration: none; }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.88rem; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--gold); }
+    .nav-links a.active { color: var(--gold); }
+    .nav-actions { display: flex; align-items: center; gap: 14px; }
+    .cart-btn { position: relative; background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text); padding: 9px 14px; border-radius: 10px; cursor: pointer; font-size: 1rem; transition: all 0.3s; text-decoration: none; display: flex; align-items: center; gap: 7px; }
+    .cart-btn:hover { background: rgba(201,168,76,0.1); border-color: var(--gold); color: var(--gold); }
+    .cart-badge { position: absolute; top: -7px; right: -7px; background: var(--gold); color: #0a1a0d; font-size: 0.62rem; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .btn-nav-login { background: linear-gradient(135deg, var(--gold), #a8862e); color: #0a1a0d; border: none; padding: 9px 20px; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 700; cursor: pointer; text-decoration: none; transition: all 0.3s; }
+    .btn-nav-login:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(201,168,76,0.35); }
+    .user-pill { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; padding: 7px 14px; cursor: pointer; transition: all 0.3s; }
+    .user-pill:hover { border-color: var(--gold); }
+    .user-avatar { width: 28px; height: 28px; background: var(--gold); color: #0a1a0d; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; }
+    .user-name { font-size: 0.85rem; font-weight: 500; }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      margin-top: 64px;
+      background: linear-gradient(135deg, #0d2211 0%, #153320 100%);
+      padding: 50px 60px;
+      border-bottom: 1px solid var(--border);
+    }
+    .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px; }
+    .breadcrumb a { color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+    .breadcrumb a:hover { color: var(--gold); }
+    .breadcrumb-sep { color: rgba(255,255,255,0.2); }
+    .page-header h1 { font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .page-header p { color: var(--text-muted); font-size: 0.92rem; }
+
+    /* ── ORDERS PAGE LAYOUT ── */
+    .orders-page {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 50px 60px 80px;
+    }
+
+    /* ── ORDER FILTER TABS ── */
+    .order-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+    .order-tab {
+      padding: 9px 20px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .order-tab.active { background: rgba(201,168,76,0.1); border-color: var(--gold); color: var(--gold); font-weight: 600; }
+    .order-tab:hover:not(.active) { border-color: rgba(201,168,76,0.3); color: var(--text); }
+
+    /* ── ORDER LIST ── */
+    .orders-list { display: flex; flex-direction: column; gap: 20px; }
+
+    .order-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 20px;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+    .order-card:hover { border-color: rgba(201,168,76,0.25); }
+    .order-card.expanded { border-color: rgba(201,168,76,0.3); }
+
+    .order-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .order-header:hover { background: rgba(255,255,255,0.02); }
+
+    .order-header-left { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .order-id { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+    .order-id strong { color: var(--gold); font-family: 'Playfair Display', serif; font-size: 0.95rem; }
+    .order-date { font-size: 0.8rem; color: var(--text-muted); }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .status-processing { background: rgba(243,156,18,0.15); color: #f39c12; border: 1px solid rgba(243,156,18,0.3); }
+    .status-shipped { background: rgba(52,152,219,0.15); color: #3498db; border: 1px solid rgba(52,152,219,0.3); }
+    .status-delivered { background: rgba(39,174,96,0.15); color: #27ae60; border: 1px solid rgba(39,174,96,0.3); }
+    .status-cancelled { background: rgba(231,76,60,0.15); color: #e74c3c; border: 1px solid rgba(231,76,60,0.3); }
+    .status-placed { background: rgba(149,165,166,0.15); color: #95a5a6; border: 1px solid rgba(149,165,166,0.3); }
+
+    .order-header-right { display: flex; align-items: center; gap: 16px; }
+    .order-total { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--gold); }
+    .order-items-count { font-size: 0.78rem; color: var(--text-muted); }
+    .expand-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; transition: all 0.25s; }
+    .expand-btn:hover { border-color: var(--gold); color: var(--gold); }
+    .expand-btn.open { transform: rotate(180deg); border-color: var(--gold); color: var(--gold); }
+
+    /* ── ORDER DETAIL ── */
+    .order-detail {
+      display: none;
+      padding: 0 24px 24px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      animation: fadeIn 0.3s ease;
+    }
+    .order-detail.open { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Timeline */
+    .order-timeline {
+      margin: 24px 0;
+    }
+    .timeline-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+    .timeline-steps {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      position: relative;
+    }
+    .timeline-step {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      position: relative;
+    }
+    .timeline-step::before {
+      content: '';
+      position: absolute;
+      top: 18px;
+      left: 50%;
+      width: 100%;
+      height: 2px;
+      background: rgba(255,255,255,0.08);
+      z-index: 0;
+    }
+    .timeline-step:last-child::before { display: none; }
+    .timeline-dot {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem;
+      position: relative; z-index: 1;
+      transition: all 0.3s;
+    }
+    .timeline-step.done .timeline-dot { background: rgba(39,174,96,0.2); border-color: #27ae60; }
+    .timeline-step.current .timeline-dot { background: rgba(201,168,76,0.2); border-color: var(--gold); box-shadow: 0 0 15px rgba(201,168,76,0.3); }
+    .timeline-step::after {
+      content: '';
+      position: absolute;
+      top: 18px; left: 0;
+      width: 50%;
+      height: 2px;
+      background: #27ae60;
+      z-index: 0;
+      display: none;
+    }
+    .timeline-step.done::after { display: block; }
+    .timeline-label { font-size: 0.7rem; color: var(--text-muted); text-align: center; text-transform: capitalize; }
+    .timeline-date { font-size: 0.65rem; color: rgba(240,235,224,0.4); text-align: center; }
+    .timeline-step.done .timeline-label { color: #27ae60; }
+    .timeline-step.current .timeline-label { color: var(--gold); font-weight: 600; }
+
+    /* Detail sections */
+    .detail-sections {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 24px;
+    }
+    .detail-section {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px;
+      padding: 18px;
+    }
+    .detail-section-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+    .detail-section p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+    }
+    .detail-section p strong { color: var(--text); }
+
+    /* Items in order */
+    .order-items-list { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+    .order-item-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px;
+    }
+    .order-item-img { width: 56px; height: 56px; border-radius: 10px; overflow: hidden; flex-shrink: 0; }
+    .order-item-img img { width: 100%; height: 100%; object-fit: cover; }
+    .order-item-info { flex: 1; }
+    .order-item-name { font-size: 0.88rem; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+    .order-item-meta { font-size: 0.75rem; color: var(--text-muted); }
+    .order-item-price { font-weight: 700; color: var(--gold); font-size: 0.9rem; }
+
+    .order-totals-section {
+      margin-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding-top: 16px;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .totals-table { min-width: 260px; }
+    .totals-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.85rem; }
+    .totals-row .lbl { color: var(--text-muted); }
+    .totals-row .val { color: var(--text); font-weight: 600; }
+    .totals-row.grand { border-top: 1px solid rgba(255,255,255,0.08); margin-top: 6px; padding-top: 10px; }
+    .totals-row.grand .lbl { color: var(--text); font-weight: 700; }
+    .totals-row.grand .val { color: var(--gold); font-family: 'Playfair Display', serif; font-size: 1.1rem; }
+
+    /* ── EMPTY STATE ── */
+    .empty-orders {
+      text-align: center;
+      padding: 80px 40px;
+    }
+    .empty-orders-icon { font-size: 5rem; opacity: 0.3; margin-bottom: 24px; }
+    .empty-orders h2 { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+    .empty-orders p { color: var(--text-muted); margin-bottom: 28px; font-size: 0.95rem; }
+
+    .btn-shop {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--gold), #a8862e);
+      color: #0a1a0d;
+      padding: 14px 32px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.95rem;
+      transition: all 0.3s;
+    }
+    .btn-shop:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(201,168,76,0.4); }
+
+    /* Loading */
+    .loading-state { text-align: center; padding: 60px; color: var(--text-muted); }
+    .loading-spinner { font-size: 2rem; animation: spin 1s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Toast */
+    #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+    .toast { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-radius: 12px; background: rgba(13,34,17,0.95); border: 1px solid rgba(201,168,76,0.3); backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(0,0,0,0.4); color: var(--text); font-size: 0.88rem; max-width: 320px; animation: slideInToast 0.3s ease; transition: opacity 0.3s, transform 0.3s; }
+    .toast.hide { opacity: 0; transform: translateX(20px); }
+    .toast-success { border-color: rgba(39,174,96,0.4); }
+    .toast-error { border-color: rgba(231,76,60,0.4); }
+    @keyframes slideInToast { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+    @media (max-width: 900px) {
+      .navbar { padding: 12px 24px; }
+      .nav-links { display: none; }
+      .page-header { padding: 36px 24px; }
+      .orders-page { padding: 30px 24px 60px; }
+      .detail-sections { grid-template-columns: 1fr; }
+      .timeline-steps { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .timeline-step::before, .timeline-step::after { display: none; }
+      .timeline-step { flex-direction: row; gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a class="nav-logo" href="index.html">🌿 OrganicTrade</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="shop.html">Shop</a></li>
+      <li><a href="orders.html" class="active">My Orders</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a class="cart-btn" href="checkout.html">
+        🛒 <span id="cart-count-badge" class="cart-badge" style="display:none;">0</span>
+      </a>
+      <div id="nav-auth"></div>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="breadcrumb">
+      <a href="index.html">🏠 Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>My Orders</span>
+    </div>
+    <h1>📦 My Orders</h1>
+    <p id="orders-summary-text">Loading your order history...</p>
+  </div>
+
+  <!-- ORDERS PAGE -->
+  <div class="orders-page">
+    <!-- Filter tabs -->
+    <div class="order-tabs" id="order-tabs">
+      <button class="order-tab active" onclick="filterOrders('all', this)">🗂 All Orders</button>
+      <button class="order-tab" onclick="filterOrders('processing', this)">⏳ Processing</button>
+      <button class="order-tab" onclick="filterOrders('shipped', this)">🚚 Shipped</button>
+      <button class="order-tab" onclick="filterOrders('delivered', this)">✅ Delivered</button>
+    </div>
+    <!-- Orders list -->
+    <div id="orders-container">
+      <div class="loading-state"><span class="loading-spinner">⏳</span></div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+  <script src="js/store.js"></script>
+  <script>
+    function showToast(msg, type = 'info') {
+      const c = document.getElementById('toast-container');
+      const icons = { success: '✅', error: '❌', warning: '⚠️', info: '🌿' };
+      const t = document.createElement('div');
+      t.className = `toast toast-${type}`;
+      t.innerHTML = `<span>${icons[type] || '🌿'}</span><span>${msg}</span>`;
+      c.appendChild(t);
+      setTimeout(() => { t.classList.add('hide'); setTimeout(() => t.remove(), 300); }, 3000);
+    }
+
+    function updateCartBadge() {
+      const count = Store.getCartCount();
+      const badge = document.getElementById('cart-count-badge');
+      if (count > 0) { badge.textContent = count; badge.style.display = 'flex'; }
+      else badge.style.display = 'none';
+    }
+
+    function renderNavAuth() {
+      const user = Store.getCurrentUser();
+      const el = document.getElementById('nav-auth');
+      if (user) {
+        el.innerHTML = `<div class="user-pill" onclick="handleLogout()"><div class="user-avatar">${user.avatar || user.name[0]}</div><span class="user-name">${user.name.split(' ')[0]}</span><span style="font-size:0.7rem;color:var(--text-muted)">↩</span></div>`;
+      } else {
+        el.innerHTML = `<a class="btn-nav-login" href="auth.html">🔑 Sign In</a>`;
+      }
+    }
+    function handleLogout() { Store.logout(); showToast('Signed out 🌿', 'info'); setTimeout(() => window.location.href = 'auth.html', 600); }
+
+    // ── Status config ──────────────────────────
+    const STATUS_CONFIG = {
+      placed:     { icon: '📋', label: 'Placed',     class: 'status-placed' },
+      processing: { icon: '⏳', label: 'Processing', class: 'status-processing' },
+      shipped:    { icon: '🚚', label: 'Shipped',    class: 'status-shipped' },
+      delivered:  { icon: '✅', label: 'Delivered',  class: 'status-delivered' },
+      cancelled:  { icon: '❌', label: 'Cancelled',  class: 'status-cancelled' }
+    };
+
+    const TIMELINE_STEPS = [
+      { key: 'placed',     icon: '📋', label: 'Order Placed' },
+      { key: 'processing', icon: '⚙️',  label: 'Processing' },
+      { key: 'shipped',    icon: '🚚', label: 'Shipped' },
+      { key: 'delivered',  icon: '✅', label: 'Delivered' }
+    ];
+
+    let allOrders = [];
+    let currentFilter = 'all';
+
+    function filterOrders(filter, btn) {
+      currentFilter = filter;
+      document.querySelectorAll('.order-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      renderOrders();
+    }
+
+    function renderOrders() {
+      const container = document.getElementById('orders-container');
+      let orders = [...allOrders];
+      if (currentFilter !== 'all') orders = orders.filter(o => o.status === currentFilter);
+
+      if (orders.length === 0) {
+        container.innerHTML = `
+          <div class="empty-orders">
+            <div class="empty-orders-icon">📦</div>
+            <h2>${currentFilter === 'all' ? "No Orders Yet" : `No ${currentFilter.charAt(0).toUpperCase() + currentFilter.slice(1)} Orders`}</h2>
+            <p>${currentFilter === 'all' ? "You haven't placed any orders yet. Start exploring our premium organic products!" : "No orders with this status found."}</p>
+            <a href="shop.html" class="btn-shop">🛒 Start Shopping</a>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = `<div class="orders-list">${orders.map(order => renderOrderCard(order)).join('')}</div>`;
+    }
+
+    function renderOrderCard(order) {
+      const st = STATUS_CONFIG[order.status] || STATUS_CONFIG.processing;
+      const itemCount = (order.items || []).reduce((n, i) => n + i.qty, 0);
+      return `
+        <div class="order-card" id="oc-${order.id}">
+          <div class="order-header" onclick="toggleOrder('${order.id}')">
+            <div class="order-header-left">
+              <div class="order-id">
+                <strong>#${order.id.replace('ord_','').toUpperCase()}</strong>
+              </div>
+              <div class="order-date">📅 ${Store.formatDate(order.createdAt)}</div>
+              <div class="status-badge ${st.class}">${st.icon} ${st.label}</div>
+            </div>
+            <div class="order-header-right">
+              <div>
+                <div class="order-total">${Store.formatPrice(order.total)}</div>
+                <div class="order-items-count">${itemCount} item${itemCount !== 1 ? 's' : ''}</div>
+              </div>
+              <button class="expand-btn" id="expand-${order.id}">▾</button>
+            </div>
+          </div>
+          <div class="order-detail" id="od-${order.id}">
+            ${renderOrderDetail(order)}
+          </div>
+        </div>`;
+    }
+
+    function renderOrderDetail(order) {
+      const timeline = order.timeline || [];
+
+      // Determine done/current steps
+      const timelineHTML = TIMELINE_STEPS.map((step, idx) => {
+        const found = timeline.find(t => t.status === step.key);
+        const isDone = !!found;
+        const isCurrent = !isDone && (
+          (step.key === 'processing' && order.status === 'placed') ||
+          (step.key === order.status)
+        );
+
+        return `
+          <div class="timeline-step ${isDone ? 'done' : ''} ${isCurrent ? 'current' : ''}">
+            <div class="timeline-dot">${isDone ? '✓' : step.icon}</div>
+            <div>
+              <div class="timeline-label">${step.label}</div>
+              ${found ? `<div class="timeline-date">${Store.formatDate(found.date)}</div>` : ''}
+            </div>
+          </div>`;
+      }).join('');
+
+      const addr = order.shippingAddress || {};
+      const addrStr = addr.street ? `${addr.street}, ${addr.city}, ${addr.state} ${addr.zip}, ${addr.country}` : 'Not provided';
+
+      const itemsHTML = (order.items || []).map(item => `
+        <div class="order-item-row">
+          <div class="order-item-img">
+            <img src="${item.image}" alt="${item.name}" loading="lazy" />
+          </div>
+          <div class="order-item-info">
+            <div class="order-item-name">${item.name}</div>
+            <div class="order-item-meta">Qty: ${item.qty} · ${Store.formatPrice(item.price)} each</div>
+          </div>
+          <div class="order-item-price">${Store.formatPrice(item.price * item.qty)}</div>
+        </div>`).join('');
+
+      return `
+        <!-- Timeline -->
+        <div class="order-timeline">
+          <div class="timeline-title">🔄 Order Progress</div>
+          <div class="timeline-steps">${timelineHTML}</div>
+        </div>
+
+        <!-- Items -->
+        <div class="timeline-title" style="font-size:0.75rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-top:20px;margin-bottom:12px;">📦 Items Ordered</div>
+        <div class="order-items-list">${itemsHTML}</div>
+
+        <!-- Totals -->
+        <div class="order-totals-section">
+          <div class="totals-table">
+            <div class="totals-row"><span class="lbl">Subtotal</span><span class="val">${Store.formatPrice(order.subtotal)}</span></div>
+            <div class="totals-row"><span class="lbl">Shipping</span><span class="val">${order.shipping === 0 ? 'FREE' : Store.formatPrice(order.shipping)}</span></div>
+            <div class="totals-row"><span class="lbl">Tax</span><span class="val">${Store.formatPrice(order.tax)}</span></div>
+            <div class="totals-row grand"><span class="lbl">Total</span><span class="val">${Store.formatPrice(order.total)}</span></div>
+          </div>
+        </div>
+
+        <!-- Shipping & Payment -->
+        <div class="detail-sections">
+          <div class="detail-section">
+            <div class="detail-section-title">🚚 Shipping Address</div>
+            <p>${addrStr}</p>
+          </div>
+          <div class="detail-section">
+            <div class="detail-section-title">💳 Payment</div>
+            <p><strong>${order.paymentMethod || 'N/A'}</strong></p>
+            <p style="margin-top:8px;font-size:0.78rem;">Order Date: ${Store.formatDate(order.createdAt)}</p>
+            ${order.updatedAt ? `<p style="font-size:0.78rem;">Last Updated: ${Store.formatDate(order.updatedAt)}</p>` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    function toggleOrder(orderId) {
+      const detail = document.getElementById('od-' + orderId);
+      const card = document.getElementById('oc-' + orderId);
+      const btn = document.getElementById('expand-' + orderId);
+      const isOpen = detail.classList.contains('open');
+      detail.classList.toggle('open', !isOpen);
+      card.classList.toggle('expanded', !isOpen);
+      btn.classList.toggle('open', !isOpen);
+    }
+
+    // ── Init ───────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      // Auth check
+      const user = Store.requireAuth(['customer', 'admin', 'vendor'], 'auth.html');
+      if (!user) return;
+
+      renderNavAuth();
+      updateCartBadge();
+
+      // Load orders
+      allOrders = Store.getOrders({ userId: user.role === 'customer' ? user.id : undefined });
+      
+      const total = allOrders.length;
+      document.getElementById('orders-summary-text').textContent =
+        total > 0 ? `You have ${total} order${total !== 1 ? 's' : ''} · Welcome back, ${user.name}!` : `Welcome, ${user.name}! Start shopping to see your orders here.`;
+
+      renderOrders();
+    });
+  </script>
+</body>
+</html>
